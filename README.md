@@ -75,3 +75,9 @@ pnpm --filter web db:studio
 5. Vercel에서 monorepo root를 연결하고 Build Command를 `pnpm build`로 설정합니다.
 
 SDK는 npm 장기 토큰을 사용하지 않습니다. npm의 `@nogglee/feedbox` 패키지 설정에서 GitHub Actions Trusted Publisher를 `publish-sdk.yml`에 연결한 후 `sdk-v0.1.0` 형식의 태그를 push하면 OIDC로 배포됩니다.
+
+## License
+
+FEEDBOX 플랫폼 소스는 [PolyForm Perimeter License 1.0.0](LICENSE)에 따라 공개됩니다. 개인 사용, 내부 사용, 수정 및 학습은 허용되지만 FEEDBOX를 대체하는 제품으로 재판매하거나 경쟁 서비스 또는 호스팅 SaaS로 제공할 수 없습니다. 따라서 이 저장소는 OSI 정의의 오픈소스가 아닌 source-available 소프트웨어입니다.
+
+`packages/sdk`의 `@nogglee/feedbox` SDK는 고객 애플리케이션에서 사용할 수 있도록 별도의 [MIT License](packages/sdk/LICENSE)를 적용합니다.

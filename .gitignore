@@ -8,5 +8,6 @@ dist/
 *.tsbuildinfo
 .vercel
 .claude/settings.local.json
+.claude
 .qa-local/
 apps/web/lib/generated/

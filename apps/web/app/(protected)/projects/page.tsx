@@ -4,14 +4,14 @@ import { SubscribeUpsell } from "@/components/subscribe-upsell";
 import { projectLimit } from "@/features/billing/domain/entitlements";
 import { hasSubscriptionInterest } from "@/features/billing/server/subscription-interest";
 import { requireOrg } from "@/lib/orgs";
-import { store } from "@/lib/store";
+import { listProjectsForOrg } from "@/features/projects/server/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
   const ctx = await requireOrg();
   if (!ctx) throw new Error("Supabase Auth 환경변수가 필요합니다");
-  const projects = await store.listProjects(ctx.org.id);
+  const projects = await listProjectsForOrg(ctx.org.id);
 
   const limitReached = projects.length >= projectLimit(ctx.org);
   const subscribeRequested = limitReached

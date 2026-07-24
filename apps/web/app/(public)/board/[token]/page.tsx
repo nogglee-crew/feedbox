@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import { IssueMeta } from "@/components/issue-meta";
-import { store } from "@/lib/store";
+import {
+  getProject,
+  getRelease,
+  getSessionByToken,
+  listIssues,
+} from "@/features/projects/server/queries";
 import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +32,13 @@ const STATUS_BADGE: Record<IssueStatus, string> = {
 export default async function BoardPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
-  const session = await store.getSessionByToken(token);
+  const session = await getSessionByToken(token);
   if (!session || session.revoked_at) notFound();
 
   const [project, release, issues] = await Promise.all([
-    store.getProject(session.project_id),
-    store.getRelease(session.release_id),
-    store.listIssues(session.release_id, {}),
+    getProject(session.project_id),
+    getRelease(session.release_id),
+    listIssues(session.release_id, {}),
   ]);
   if (!project || !release) notFound();
 

@@ -4,8 +4,13 @@ import { createQaSession, revokeQaSession } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
 import { AssigneeControl, IssueStatusSelect } from "@/components/issue-controls";
 import { IssueMeta } from "@/components/issue-meta";
+import {
+  getProject,
+  getRelease,
+  listIssues,
+  listSessions,
+} from "@/features/projects/server/queries";
 import { listOrgMembers, requireOrg } from "@/lib/orgs";
-import { store } from "@/lib/store";
 import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -26,19 +31,28 @@ export default async function ReleasePage({
   const { status: statusFilter, q } = await searchParams;
 
   const ctx = await requireOrg();
-  const [project, release, memberEmails, issues, sessions] = await Promise.all([
-    store.getProject(id),
-    store.getRelease(releaseId),
-    ctx ? listOrgMembers(ctx.org.id).then((members) => members.map((m) => m.email)) : Promise.resolve(null),
-    store.listIssues(releaseId, {
+  const [project, release] = await Promise.all([getProject(id), getRelease(releaseId)]);
+  // 프로젝트가 내 조직 소속인지 + 릴리즈가 그 프로젝트 소속인지 모두 확인해야
+  // URL의 releaseId를 다른 조직 것으로 바꿔치기하는 접근을 막을 수 있다
+  if (
+    !project ||
+    !release ||
+    project.org_id !== ctx.org.id ||
+    release.project_id !== project.id
+  ) {
+    notFound();
+  }
+
+  const [memberEmails, issues, sessions] = await Promise.all([
+    listOrgMembers(ctx.org.id).then((members) => members.map((m) => m.email)),
+    listIssues(releaseId, {
       status: ISSUE_STATUSES.includes(statusFilter as IssueStatus)
         ? (statusFilter as IssueStatus)
         : undefined,
       q: q || undefined,
     }),
-    store.listSessions(releaseId),
+    listSessions(releaseId),
   ]);
-  if (!project || !release || (ctx && project.org_id !== ctx.org.id)) notFound();
 
   const now = Date.now();
 

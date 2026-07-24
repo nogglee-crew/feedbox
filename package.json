@@ -1,10 +1,13 @@
 {
   "name": "feedbox",
   "private": true,
+  "license": "PolyForm-Perimeter-1.0.0",
   "scripts": {
     "build": "pnpm --filter @nogglee/feedbox build && pnpm --filter web build",
+    "check:conventions": "bash scripts/check-conventions.sh",
     "dev": "pnpm --filter web dev",
     "dev:sdk": "pnpm --filter @nogglee/feedbox dev",
+    "prepare": "node scripts/setup-git-hooks.mjs",
     "typecheck": "pnpm -r typecheck"
   },
   "packageManager": "pnpm@10.33.0"

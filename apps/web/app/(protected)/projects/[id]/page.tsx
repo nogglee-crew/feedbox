@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createRelease, deleteProject, setReleaseStatus, updateProjectBaseUrl } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
 import { requireOrg } from "@/lib/orgs";
-import { store } from "@/lib/store";
+import { getProject, listReleases } from "@/features/projects/server/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
 
   const ctx = await requireOrg();
-  const [project, releases] = await Promise.all([store.getProject(id), store.listReleases(id)]);
+  const [project, releases] = await Promise.all([getProject(id), listReleases(id)]);
   if (!project || (ctx && project.org_id !== ctx.org.id)) notFound();
 
   return (
@@ -41,7 +41,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex items-center gap-2">
             <span className="w-24 text-xs font-semibold text-gray-500">apiKey</span>
-            <code className="rounded bg-gray-100 px-2 py-0.5">{project.api_key}</code>
+            {/* 화면 공유/캡처 시 우발적 노출을 막기 위해 앞 3글자만 표시 (복사는 전체 값) */}
+            <code className="rounded bg-gray-100 px-2 py-0.5">
+              {project.api_key.slice(0, 3)}
+              {"•".repeat(12)}
+            </code>
             <CopyButton value={project.api_key} />
           </div>
         </div>

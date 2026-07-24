@@ -1,19 +1,29 @@
+import {
+  countRecentSessionIssues,
+  createSdkIssue,
+  saveScreenshot,
+} from "@/features/issues/server/sdk-issues";
 import { authenticateSdk, corsJson, corsPreflight } from "@/lib/sdk-auth";
-import { store } from "@/lib/store";
+
+// 세션당 분당 이슈 등록 한도 (스토리지 남용 방지)
+const RATE_LIMIT_PER_MINUTE = 10;
 
 export async function OPTIONS() {
   return corsPreflight();
 }
 
-const MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024;
+// Vercel 서버리스 요청 본문 한도가 4.5MB이므로 그 이하로 잡는다 (SDK가 JPEG 압축해서 보냄)
+const MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024;
 
-function decodeScreenshot(dataUrl: unknown): Buffer | null {
+function decodeScreenshot(
+  dataUrl: unknown,
+): { buffer: Buffer; contentType: "image/png" | "image/jpeg" } | null {
   if (typeof dataUrl !== "string") return null;
-  const match = /^data:image\/png;base64,(.+)$/.exec(dataUrl);
+  const match = /^data:image\/(png|jpeg);base64,(.+)$/.exec(dataUrl);
   if (!match) return null;
-  const buffer = Buffer.from(match[1], "base64");
+  const buffer = Buffer.from(match[2], "base64");
   if (buffer.byteLength === 0 || buffer.byteLength > MAX_SCREENSHOT_BYTES) return null;
-  return buffer;
+  return { buffer, contentType: match[1] === "png" ? "image/png" : "image/jpeg" };
 }
 
 export async function POST(request: Request) {
@@ -27,11 +37,18 @@ export async function POST(request: Request) {
     return corsJson({ error: "pageUrl, selector, memo가 필요합니다" }, 400);
   }
 
-  const png = decodeScreenshot(body.screenshot);
-  const screenshotUrl = png ? await store.saveScreenshot(project.id, png) : null;
+  const recentCount = await countRecentSessionIssues(session.id, 60_000);
+  if (recentCount >= RATE_LIMIT_PER_MINUTE) {
+    return corsJson({ error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." }, 429);
+  }
+
+  const screenshot = decodeScreenshot(body.screenshot);
+  const screenshotUrl = screenshot
+    ? await saveScreenshot(project.id, screenshot.buffer, screenshot.contentType)
+    : null;
 
   try {
-    const { id } = await store.createIssue({
+    const { id } = await createSdkIssue({
       project_id: project.id,
       release_id: release.id,
       session_id: session.id,

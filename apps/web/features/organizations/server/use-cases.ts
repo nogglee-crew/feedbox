@@ -66,21 +66,30 @@ export async function addOrganizationMember(input: {
   role: "owner" | "member";
 }): Promise<void> {
   await assertOwner(input.orgId);
-  await prisma.organizationMember.upsert({
-    where: {
-      orgId_email: {
-        orgId: input.orgId,
-        email: normalizeEmail(input.email),
-      },
-    },
-    update: {
-      role: input.role === "owner" ? "OWNER" : "MEMBER",
-    },
-    create: {
-      orgId: input.orgId,
-      email: normalizeEmail(input.email),
-      role: input.role === "owner" ? "OWNER" : "MEMBER",
-    },
+  const email = normalizeEmail(input.email);
+  const role = input.role === "owner" ? "OWNER" : "MEMBER";
+
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.organizationMember.findUnique({
+      where: { orgId_email: { orgId: input.orgId, email } },
+      select: { id: true, role: true },
+    });
+
+    // 기존 owner를 member로 바꾸는 경우, 마지막 owner면 조직이 관리 불능이 되므로 막는다
+    if (existing?.role === "OWNER" && role === "MEMBER") {
+      const ownerCount = await tx.organizationMember.count({
+        where: { orgId: input.orgId, role: "OWNER" },
+      });
+      if (ownerCount <= 1) {
+        throw new Error("마지막 owner는 member로 변경할 수 없습니다");
+      }
+    }
+
+    if (existing) {
+      await tx.organizationMember.update({ where: { id: existing.id }, data: { role } });
+    } else {
+      await tx.organizationMember.create({ data: { orgId: input.orgId, email, role } });
+    }
   });
 }
 

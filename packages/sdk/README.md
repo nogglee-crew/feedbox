@@ -19,3 +19,7 @@ import { FeedboxProvider } from "@nogglee/feedbox";
 ```
 
 Open a generated FEEDBOX link in the form `https://service.example.com#session=<token>`.
+
+## License
+
+The `@nogglee/feedbox` SDK is available under the [MIT License](LICENSE). The FEEDBOX platform source is licensed separately under the PolyForm Perimeter License 1.0.0.

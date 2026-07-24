@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+pnpm check:conventions
+pnpm --filter web exec prisma validate
+pnpm typecheck

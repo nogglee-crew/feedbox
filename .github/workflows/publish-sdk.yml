@@ -25,6 +25,13 @@ jobs:
           package-manager-cache: false
       - run: npm install --global npm@latest
       - run: pnpm install --frozen-lockfile
+      - name: Verify tag matches package version
+        run: |
+          version=$(node -p "require('./packages/sdk/package.json').version")
+          if [ "$GITHUB_REF_NAME" != "sdk-v$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package version $version"
+            exit 1
+          fi
       - run: pnpm --filter @nogglee/feedbox typecheck
       - run: pnpm --filter @nogglee/feedbox build
       - run: npm publish
