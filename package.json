@@ -1,0 +1,11 @@
+{
+  "name": "feedbox",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter @nogglee/feedbox build && pnpm --filter web build",
+    "dev": "pnpm --filter web dev",
+    "dev:sdk": "pnpm --filter @nogglee/feedbox dev",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

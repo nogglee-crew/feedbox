@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrganizationRole {
+  OWNER
+  MEMBER
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum BillingStatus {
+  UNPAID
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum AccessOverride {
+  NONE
+  ADMIN
+  TEST
+}
+
+enum ReleaseStatus {
+  OPEN
+  CLOSED
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CLOSED
+}
+
+model Organization {
+  id                    String           @id @default(uuid()) @db.Uuid
+  name                  String
+  plan                  Plan             @default(FREE)
+  billingStatus         BillingStatus    @default(UNPAID) @map("billing_status")
+  accessOverride        AccessOverride   @default(NONE) @map("access_override")
+  billingProvider       String?          @map("billing_provider")
+  billingCustomerId     String?          @unique @map("billing_customer_id")
+  billingSubscriptionId String?          @unique @map("billing_subscription_id")
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  members               OrganizationMember[]
+  projects              Project[]
+  subscriptionInterests SubscriptionInterest[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id         String           @id @default(uuid()) @db.Uuid
+  orgId      String           @map("org_id") @db.Uuid
+  authUserId String?          @map("auth_user_id") @db.Uuid
+  email      String
+  role       OrganizationRole @default(MEMBER)
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  org        Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, email])
+  @@index([email])
+  @@index([authUserId])
+  @@map("organization_members")
+}
+
+model Project {
+  id         String       @id @default(uuid()) @db.Uuid
+  orgId      String       @map("org_id") @db.Uuid
+  name       String
+  projectKey String       @unique @map("project_key")
+  apiKey     String       @map("api_key")
+  baseUrl    String?      @map("base_url")
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  releases   Release[]
+  sessions   QaSession[]
+  issues     Issue[]
+
+  @@index([orgId, createdAt])
+  @@map("projects")
+}
+
+model Release {
+  id        String        @id @default(uuid()) @db.Uuid
+  projectId String        @map("project_id") @db.Uuid
+  version   String
+  status    ReleaseStatus @default(OPEN)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sessions  QaSession[]
+  issues    Issue[]
+
+  @@unique([projectId, version])
+  @@index([projectId, createdAt])
+  @@map("releases")
+}
+
+model QaSession {
+  id        String    @id @default(uuid()) @db.Uuid
+  token     String    @unique
+  projectId String    @map("project_id") @db.Uuid
+  releaseId String    @map("release_id") @db.Uuid
+  createdBy String?   @map("created_by")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  release   Release   @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  issues    Issue[]
+
+  @@index([releaseId, createdAt])
+  @@map("qa_sessions")
+}
+
+model Issue {
+  id             Int         @id @default(autoincrement())
+  projectId      String      @map("project_id") @db.Uuid
+  releaseId      String      @map("release_id") @db.Uuid
+  sessionId      String?     @map("session_id") @db.Uuid
+  pageUrl        String      @map("page_url")
+  selector       String
+  elementText    String?     @map("element_text")
+  viewportWidth  Int?        @map("viewport_width")
+  viewportHeight Int?        @map("viewport_height")
+  browser        String?
+  memo           String
+  screenshotUrl  String?     @map("screenshot_url")
+  status         IssueStatus @default(OPEN)
+  assignee       String?
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  release        Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  session        QaSession?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([releaseId, status, createdAt])
+  @@map("issues")
+}
+
+model SubscriptionInterest {
+  id              String        @id @default(uuid()) @db.Uuid
+  email           String        @unique
+  orgId           String?       @map("org_id") @db.Uuid
+  privacyAgreedAt DateTime      @map("privacy_agreed_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  org             Organization? @relation(fields: [orgId], references: [id], onDelete: SetNull)
+
+  @@map("subscription_interests")
+}
