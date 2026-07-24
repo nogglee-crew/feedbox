@@ -5,6 +5,10 @@ import { cache } from "react";
 export interface AuthenticatedUser {
   id: string;
   email: string;
+  /** Google 계정 이름 (없으면 null) */
+  name: string | null;
+  /** Google 프로필 사진 URL (없으면 null) */
+  avatarUrl: string | null;
 }
 
 export function authEnv() {
@@ -42,5 +46,20 @@ export const getUser = cache(async function getUser(): Promise<AuthenticatedUser
 
   const id = data?.claims.sub;
   const email = data?.claims.email;
-  return typeof id === "string" && typeof email === "string" ? { id, email } : null;
+  if (typeof id !== "string" || typeof email !== "string") return null;
+
+  const meta = (data?.claims.user_metadata ?? {}) as Record<string, unknown>;
+  const pick = (...keys: string[]): string | null => {
+    for (const key of keys) {
+      const value = meta[key];
+      if (typeof value === "string" && value) return value;
+    }
+    return null;
+  };
+  return {
+    id,
+    email,
+    name: pick("full_name", "name"),
+    avatarUrl: pick("avatar_url", "picture"),
+  };
 });

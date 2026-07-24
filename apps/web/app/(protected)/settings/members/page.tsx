@@ -1,4 +1,5 @@
 import { addOrgMember, removeOrgMember } from "@/app/org-actions";
+import { RoleBadge } from "@/components/badge";
 import { listOrgMembers, requireOrg } from "@/lib/orgs";
 
 export const dynamic = "force-dynamic";
@@ -63,13 +64,7 @@ export default async function MembersPage() {
                   {m.email === ctx.email && <span className="ml-2 text-xs text-gray-400">(나)</span>}
                 </td>
                 <td className="px-5 py-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      m.role === "owner" ? "bg-indigo-50 text-indigo-700" : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {m.role}
-                  </span>
+                  <RoleBadge role={m.role} />
                 </td>
                 <td className="px-5 py-3 text-xs text-gray-500">{m.user_id ? "가입됨" : "초대됨 (미로그인)"}</td>
                 <td className="px-5 py-3 text-xs text-gray-500">

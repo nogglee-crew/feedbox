@@ -60,6 +60,13 @@ export async function activateOrganizationForCurrentUser(orgId: string): Promise
   redirect("/projects");
 }
 
+export async function renameOrganization(input: { orgId: string; name: string }): Promise<void> {
+  const name = input.name.trim();
+  if (!name) return;
+  await assertOwner(input.orgId);
+  await prisma.organization.update({ where: { id: input.orgId }, data: { name } });
+}
+
 export async function addOrganizationMember(input: {
   orgId: string;
   email: string;

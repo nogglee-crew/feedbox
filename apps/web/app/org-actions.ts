@@ -6,6 +6,7 @@ import {
   addOrganizationMember,
   createOrganizationForCurrentUser,
   removeOrganizationMember,
+  renameOrganization,
 } from "@/features/organizations/server/use-cases";
 
 export async function createOrganization(formData: FormData) {
@@ -18,6 +19,15 @@ export async function setActiveOrg(formData: FormData) {
   const orgId = String(formData.get("org_id") ?? "");
   if (!orgId) return;
   await activateOrganizationForCurrentUser(orgId);
+}
+
+export async function renameOrg(formData: FormData) {
+  const orgId = String(formData.get("org_id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!orgId || !name) return;
+  await renameOrganization({ orgId, name });
+  revalidatePath("/settings/teams");
+  revalidatePath("/projects");
 }
 
 export async function addOrgMember(formData: FormData) {

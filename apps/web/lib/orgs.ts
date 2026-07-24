@@ -7,10 +7,17 @@ import type { Organization, OrgMember, OrgRole } from "./types";
 
 export const ACTIVE_ORG_COOKIE = "feedbox-active-org";
 
+export interface OrgMembershipSummary {
+  org: Organization;
+  role: OrgRole;
+}
+
 export interface OrgContext {
   org: Organization;
   role: OrgRole;
   orgs: Organization[];
+  /** 내가 속한 모든 팀과 각 팀에서의 내 역할 */
+  memberships: OrgMembershipSummary[];
   email: string;
 }
 
@@ -76,6 +83,10 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
     org: mapOrganization(active.org),
     role: active.role === "OWNER" ? "owner" : "member",
     orgs: rows.map((row) => mapOrganization(row.org)),
+    memberships: rows.map((row) => ({
+      org: mapOrganization(row.org),
+      role: row.role === "OWNER" ? ("owner" as const) : ("member" as const),
+    })),
     email,
   };
 });

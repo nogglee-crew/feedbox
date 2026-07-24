@@ -4,6 +4,8 @@ import { SubscribeUpsell } from "@/components/subscribe-upsell";
 import { projectLimit } from "@/features/billing/domain/entitlements";
 import { hasSubscriptionInterest } from "@/features/billing/server/subscription-interest";
 import { requireOrg } from "@/lib/orgs";
+import { PlanBadge } from "@/components/badge";
+import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { listProjectsForOrg } from "@/features/projects/server/queries";
 
 export const dynamic = "force-dynamic";
@@ -21,8 +23,13 @@ export default async function ProjectsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">프로젝트</h1>
-        <p className="mt-1 text-sm text-gray-500">SDK를 설치할 웹 서비스 단위로 프로젝트를 만듭니다.</p>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">{ctx.org.name}</h1>
+          <PlanBadge paid={hasPaidAccess(ctx.org)} />
+        </div>
+        <p className="mt-1 text-sm text-gray-500">
+          이 팀의 프로젝트 목록입니다. SDK를 설치할 웹 서비스 단위로 프로젝트를 만듭니다.
+        </p>
       </div>
 
       {limitReached ? (
