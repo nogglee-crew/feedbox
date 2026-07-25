@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_IMAGES, TWITTER_IMAGES } from "@/lib/site-metadata";
 import { notFound } from "next/navigation";
 import { MadeByBadge } from "@/components/made-by-badge";
 import { Tag } from "@/components/ui/badge";
@@ -46,8 +47,8 @@ export async function generateMetadata({
     title,
     description,
     ...noIndex,
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary", title, description },
+    openGraph: { title, description, type: "website", images: OG_IMAGES },
+    twitter: { card: "summary", title, description, images: TWITTER_IMAGES },
   };
 }
 

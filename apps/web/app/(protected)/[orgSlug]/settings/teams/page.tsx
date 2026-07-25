@@ -7,9 +7,8 @@ import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { CreateTeamButton } from "@/features/organizations/components/create-team";
 import { DeleteTeamButton } from "@/features/organizations/components/delete-team-button";
 import { buttonClasses } from "@/components/ui/button";
-import { SubmitButton } from "@/components/ui/submit-button";
 import { cardClasses } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { InlineEditForm } from "@/components/ui/inline-edit-form";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { listOrgMembers, requireOrgBySlug } from "@/lib/orgs";
 
@@ -72,22 +71,16 @@ export default async function TeamsPage({
 
               {isOwner && (
                 <>
-                  <form
+                  <InlineEditForm
                     action={renameOrg}
-                    className="mt-4 flex items-end gap-2"
-                  >
-                    <input type="hidden" name="org_id" value={org.id} />
-                    <Input
-                      id={`rename-org-${org.id}`}
-                      label="팀 이름 변경"
-                      name="name"
-                      defaultValue={org.name}
-                      className="w-64"
-                    />
-                    <SubmitButton variant="secondary" pendingText="저장 중...">
-                      저장
-                    </SubmitButton>
-                  </form>
+                    name="name"
+                    initialValue={org.name}
+                    hidden={{ org_id: org.id }}
+                    inputId={`rename-org-${org.id}`}
+                    label="팀 이름 변경"
+                    inputClassName="w-64"
+                    formClassName="mt-4 flex items-end gap-2"
+                  />
                   <OrgSlugForm orgId={org.id} slug={org.slug} />
                 </>
               )}

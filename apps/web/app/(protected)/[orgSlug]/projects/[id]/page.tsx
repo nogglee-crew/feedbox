@@ -8,6 +8,7 @@ import {
 } from "@/app/actions";
 import { CopyButton } from "@/components/ui/copy-button";
 import { StatusBadge } from "@/components/ui/badge";
+import { InlineEditForm } from "@/components/ui/inline-edit-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Card, cardClasses } from "@/components/ui/card";
 import { Code } from "@/components/ui/code";
@@ -100,24 +101,17 @@ export default async function ProjectPage({
             <p className="text-xs text-muted">
               QA URL을 만들 때 이 주소 뒤에 세션 토큰을 붙입니다.
             </p>
-            <form
+            <InlineEditForm
               action={updateProjectBaseUrl}
-              className="flex items-center gap-2"
-            >
-              <input type="hidden" name="org_slug" value={ctx.org.slug} />
-              <input type="hidden" name="id" value={project.id} />
-              <Input
-                id="project-base-url"
-                name="base_url"
-                aria-label="서비스 URL"
-                defaultValue={project.base_url ?? ""}
-                placeholder="https://staging.company.com"
-                className="min-w-0 flex-1"
-              />
-              <SubmitButton variant="secondary" pendingText="저장 중...">
-                저장
-              </SubmitButton>
-            </form>
+              name="base_url"
+              initialValue={project.base_url ?? ""}
+              hidden={{ org_slug: ctx.org.slug, id: project.id }}
+              inputId="project-base-url"
+              ariaLabel="서비스 URL"
+              placeholder="https://staging.company.com"
+              inputClassName="min-w-0 flex-1"
+              formClassName="flex items-center gap-2"
+            />
           </div>
         </Card>
       </div>

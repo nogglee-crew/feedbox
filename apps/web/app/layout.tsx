@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_IMAGES, TWITTER_IMAGES } from "@/lib/site-metadata";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
@@ -23,14 +24,14 @@ export const metadata: Metadata = {
     description:
       "웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼. 화면에서 문제가 된 요소를 찍고 메모만 남기면 재현 정보가 자동으로 첨부됩니다.",
     url: siteUrl,
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "FEEDBOX" }],
+    images: OG_IMAGES,
   },
   twitter: {
     card: "summary_large_image",
     title: "FEEDBOX 피드박스 | 웹 QA 피드백 플랫폼",
     description:
       "웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼. 화면에서 문제가 된 요소를 찍고 메모만 남기면 재현 정보가 자동으로 첨부됩니다.",
-    images: ["/opengraph-image.png"],
+    images: TWITTER_IMAGES,
   },
 };
 
