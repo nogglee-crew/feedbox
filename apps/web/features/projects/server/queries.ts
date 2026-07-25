@@ -3,6 +3,7 @@ import type { Issue, IssueStatus, Project, QaSession, Release } from "@/lib/type
 
 export interface IssueFilter {
   status?: IssueStatus;
+  sessionId?: string;
   q?: string;
 }
 
@@ -159,6 +160,7 @@ export async function listIssues(releaseId: string, filter: IssueFilter): Promis
   const rows = await prisma.issue.findMany({
     where: {
       releaseId,
+      sessionId: filter.sessionId,
       status: filter.status,
       ...(filter.q
         ? {

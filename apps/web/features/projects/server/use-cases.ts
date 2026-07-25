@@ -88,7 +88,20 @@ export async function setReleaseStatusForCurrentOrg(input: {
     select: { id: true },
   });
   if (!release) throw new Error("릴리즈를 찾을 수 없습니다");
-  await prisma.release.update({ where: { id: release.id }, data: { status: input.status } });
+  await prisma.$transaction(async (tx) => {
+    await tx.release.update({ where: { id: release.id }, data: { status: input.status } });
+
+    if (input.status === "CLOSED") {
+      await tx.qaSession.updateMany({
+        where: {
+          projectId: input.projectId,
+          releaseId: release.id,
+          revokedAt: null,
+        },
+        data: { revokedAt: new Date() },
+      });
+    }
+  });
 }
 
 export async function createSessionForCurrentOrg(input: {
@@ -173,4 +186,95 @@ export async function updateIssueForCurrentOrg(
       assignee: patch.assignee?.toLowerCase() ?? patch.assignee,
     },
   });
+}
+
+export async function closeIssueForQaSession(input: {
+  token: string;
+  issueId: number;
+}): Promise<void> {
+  const session = await prisma.qaSession.findUnique({
+    where: { token: input.token },
+    select: {
+      id: true,
+      releaseId: true,
+      revokedAt: true,
+      expiresAt: true,
+    },
+  });
+  if (!session || session.revokedAt || session.expiresAt.getTime() < Date.now()) {
+    throw new Error("활성 QA 세션이 아닙니다");
+  }
+
+  const issue = await prisma.issue.findFirst({
+    where: {
+      id: input.issueId,
+      releaseId: session.releaseId,
+      sessionId: session.id,
+      status: "DONE",
+    },
+    select: { id: true },
+  });
+  if (!issue) throw new Error("확인 완료할 수 있는 이슈가 아닙니다");
+
+  await prisma.issue.update({
+    where: { id: issue.id },
+    data: { status: "CLOSED" },
+  });
+}
+
+/** 공개 QA 세션은 로그인이 없으므로 토큰의 유효성과 이슈 소속만으로 권한을 판단한다 */
+async function requireActiveQaSessionIssue(input: {
+  token: string;
+  issueId: number;
+  status?: IssueStatus[];
+}) {
+  const session = await prisma.qaSession.findUnique({
+    where: { token: input.token },
+    select: { id: true, releaseId: true, revokedAt: true, expiresAt: true },
+  });
+  if (!session || session.revokedAt || session.expiresAt.getTime() < Date.now()) {
+    throw new Error("활성 QA 세션이 아닙니다");
+  }
+
+  const issue = await prisma.issue.findFirst({
+    where: {
+      id: input.issueId,
+      releaseId: session.releaseId,
+      sessionId: session.id,
+      ...(input.status ? { status: { in: input.status } } : {}),
+    },
+    select: { id: true },
+  });
+  if (!issue) throw new Error("대상 이슈를 찾을 수 없습니다");
+  return issue;
+}
+
+export async function updateIssueMemoForQaSession(input: {
+  token: string;
+  issueId: number;
+  memo: string;
+}): Promise<void> {
+  const memo = input.memo.trim();
+  if (!memo) throw new Error("내용을 입력해 주세요");
+
+  const issue = await requireActiveQaSessionIssue({
+    token: input.token,
+    issueId: input.issueId,
+    status: ["OPEN", "IN_PROGRESS"],
+  });
+
+  await prisma.issue.update({ where: { id: issue.id }, data: { memo } });
+}
+
+export async function cancelIssueForQaSession(input: {
+  token: string;
+  issueId: number;
+}): Promise<void> {
+  const issue = await requireActiveQaSessionIssue({
+    token: input.token,
+    issueId: input.issueId,
+    status: ["OPEN", "IN_PROGRESS"],
+  });
+
+  await prisma.issue.update({ where: { id: issue.id }, data: { status: "CLOSED" } });
 }

@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { HiArrowTopRightOnSquare } from "react-icons/hi2";
-import { createQaSession, revokeQaSession } from "@/app/actions";
+import { revokeQaSession } from "@/app/actions";
 import { CopyButton } from "@/components/ui/copy-button";
-import { AssigneeControl, IssueStatusSelect } from "@/features/issues/components/issue-controls";
-import { IssueMeta } from "@/features/issues/components/issue-meta";
+import { IssueCard } from "@/features/issues/components/issue-card";
+import { IssueFilters } from "@/features/issues/components/issue-filters";
+import { CreateQaSessionButton } from "@/features/projects/components/create-qa-session-button";
+import { QaSessionAccessToggle } from "@/features/projects/components/qa-session-access-toggle";
 import { StatusBadge } from "@/components/ui/badge";
-import { Button, buttonClasses } from "@/components/ui/button";
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
-import { Code } from "@/components/ui/code";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import {
   getProject,
   getRelease,
@@ -50,8 +49,8 @@ export default async function ReleasePage({
     notFound();
   }
 
-  const [memberEmails, issues, sessions] = await Promise.all([
-    listOrgMembers(ctx.org.id).then((members) => members.map((m) => m.email)),
+  const [members, issues, sessions] = await Promise.all([
+    listOrgMembers(ctx.org.id),
     listIssues(releaseId, {
       status: ISSUE_STATUSES.includes(statusFilter as IssueStatus)
         ? (statusFilter as IssueStatus)
@@ -82,26 +81,10 @@ export default async function ReleasePage({
         </h1>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold">QA 세션</h2>
-        <form action={createQaSession} className={`${cardClasses("sm")} flex flex-wrap items-end gap-3`}>
-          <input type="hidden" name="project_id" value={project.id} />
-          <input type="hidden" name="release_id" value={release.id} />
-          <Input label="발급 대상 (선택)" name="created_by" placeholder="예: 고객사 QA팀" />
-          <Input
-            label="유효기간 (일)"
-            name="days"
-            type="number"
-            defaultValue={7}
-            min={1}
-            max={90}
-            className="w-24"
-          />
-          <Button type="submit" variant="primary">
-            QA URL 발급
-          </Button>
-        </form>
-
+      <CollapsibleSection
+        title="세션 목록"
+        action={<CreateQaSessionButton projectId={project.id} releaseId={release.id} />}
+      >
         <ul className={`${cardClasses("none")} divide-y divide-border`}>
           {(sessions ?? []).map((s) => {
             const expired = new Date(s.expires_at).getTime() < now;
@@ -112,20 +95,19 @@ export default async function ReleasePage({
                 <StatusBadge tone={active ? "success" : "neutral"}>
                   {s.revoked_at ? "종료됨" : expired ? "만료됨" : "활성"}
                 </StatusBadge>
-                <Code className="max-w-md flex-1 truncate">{url}</Code>
-                <CopyButton value={url} label="QA URL 복사" />
-                <a
-                  href={`/board/${s.token}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={buttonClasses("ghost", "sm")}
-                >
-                  <HiArrowTopRightOnSquare aria-hidden className="size-3.5" />
-                  현황판
-                </a>
-                <CopyButton value={`/board/${s.token}`} label="현황판 URL 복사" relativeToOrigin />
-                <span className="text-xs text-subtle">
-                  {s.created_by && `${s.created_by} · `}~{new Date(s.expires_at).toLocaleDateString("ko-KR")}
+                <QaSessionAccessToggle />
+                <span className="flex items-center gap-1.5">
+                  <CopyButton value={url} label="피드백모드 URL" variant="secondary" />
+                  <CopyButton
+                    value={`/board/${s.token}`}
+                    label="이슈보드 URL"
+                    variant="secondary"
+                    relativeToOrigin
+                  />
+                </span>
+                <span className="ml-auto text-xs text-subtle">
+                  {s.created_by && `${s.created_by} · `}
+                  {new Date(s.expires_at).toLocaleDateString("ko-KR")} 만료
                 </span>
                 {active && (
                   <form action={revokeQaSession}>
@@ -141,61 +123,27 @@ export default async function ReleasePage({
             );
           })}
           {(!sessions || sessions.length === 0) && (
-            <EmptyState>QA URL을 발급해 테스터에게 전달하세요.</EmptyState>
+            <EmptyState>URL을 발급해 테스터에게 전달하세요.</EmptyState>
           )}
         </ul>
-      </section>
+      </CollapsibleSection>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">이슈 ({issues?.length ?? 0})</h2>
-          <form className="flex items-center gap-2" method="get">
-            <Input
-              name="q"
-              defaultValue={q ?? ""}
-              aria-label="이슈 검색"
-              placeholder="메모/URL/selector 검색"
-            />
-            <Select name="status" defaultValue={statusFilter ?? ""} aria-label="상태 필터">
-              <option value="">전체 상태</option>
-              {ISSUE_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </Select>
-            <Button type="submit">필터</Button>
-          </form>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <h2 className="shrink-0 text-lg font-bold">
+            이슈 <span className="font-normal text-muted">{issues?.length ?? 0}건</span>
+          </h2>
+          <IssueFilters q={q} status={statusFilter} />
         </div>
 
         <ul className="space-y-3">
           {(issues ?? []).map((issue) => (
-            <li key={issue.id} className={cardClasses()}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">#{issue.id}</span>
-                    <span className="truncate text-xs text-subtle">{new Date(issue.created_at).toLocaleString("ko-KR")}</span>
-                  </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm">{issue.memo}</p>
-                  <IssueMeta issue={issue} />
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <IssueStatusSelect issueId={issue.id} status={issue.status} />
-                  <AssigneeControl issueId={issue.id} assignee={issue.assignee} members={memberEmails} />
-                </div>
-              </div>
-              {issue.screenshot_url && (
-                <a href={issue.screenshot_url} target="_blank" rel="noreferrer" className="mt-4 block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={issue.screenshot_url}
-                    alt={`이슈 #${issue.id} 스크린샷`}
-                    className="max-h-64 rounded-lg border border-border object-contain"
-                  />
-                </a>
-              )}
-            </li>
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              members={members}
+              createdAtLabel={new Date(issue.created_at).toLocaleString("ko-KR")}
+            />
           ))}
           {(!issues || issues.length === 0) && (
             <li className={cardClasses("none")}>

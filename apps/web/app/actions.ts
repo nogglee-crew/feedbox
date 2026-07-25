@@ -58,6 +58,7 @@ export async function setReleaseStatus(formData: FormData) {
   await setReleaseStatusForCurrentOrg({ projectId, releaseId, status });
   await setFlashToast(status === "OPEN" ? "릴리즈를 다시 열었습니다" : "QA를 종료했습니다");
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/releases/${releaseId}`);
 }
 
 export async function createQaSession(formData: FormData) {

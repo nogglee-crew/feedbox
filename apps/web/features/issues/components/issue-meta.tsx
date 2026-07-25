@@ -43,7 +43,7 @@ export function IssueMeta({ issue, className }: { issue: Issue; className?: stri
       {issue.element_text && (
         <>
           <dt className="font-semibold text-subtle">요소 텍스트</dt>
-          <dd className="truncate text-muted">“{issue.element_text}”</dd>
+          <dd className="truncate text-muted">{issue.element_text}</dd>
         </>
       )}
 
