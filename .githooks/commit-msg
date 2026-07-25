@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
-# ============================================================
-# 커밋 메시지 게이트 — 'type: 설명' 형식 강제. scope 괄호 금지.
-# 허용 type: feat fix docs style refactor perf test build ci chore revert
-# 우회: git commit --no-verify
-# ============================================================
+# Enforces `type: subject` without scopes.
 set -u
 
 msg=$(head -1 "$1")
 
-# merge/revert 자동 커밋은 통과
 case "$msg" in
   "Merge "*|"Revert "*|"fixup!"*|"squash!"*) exit 0 ;;
 esac
 
-# scope 괄호형 명시 거부 — feat(auth): x 아니라 feat: x
 if echo "$msg" | grep -qE '^[a-z]+\(.*\):'; then
   echo "FAIL: scope 괄호 금지 — 'feat(auth): x' 가 아니라 'feat: x'"
   echo "  받은 값: $msg"

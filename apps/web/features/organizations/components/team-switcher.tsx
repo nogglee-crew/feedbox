@@ -15,7 +15,6 @@ export interface TeamOption {
   role: "owner" | "member";
 }
 
-/** 메인 상단 팀명 헤딩 — arrow-down 클릭으로 팀 전환 */
 export function TeamSwitcher({ teams, activeId }: { teams: TeamOption[]; activeId: string }) {
   const [creating, setCreating] = useState(false);
   const active = teams.find((t) => t.id === activeId) ?? teams[0];

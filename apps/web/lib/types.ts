@@ -11,7 +11,6 @@ export type OrgRole = "owner" | "member";
 
 export interface OrgMemberProfile {
   email: string;
-  /** 로그인 시 Google에서 동기화. 미로그인 초대 멤버는 null → 이니셜 fallback */
   name: string | null;
   avatar_url: string | null;
 }

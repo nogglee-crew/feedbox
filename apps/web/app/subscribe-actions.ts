@@ -5,7 +5,6 @@ import { requestSubscriptionInterest } from "@/features/billing/server/subscript
 import { getUser } from "@/lib/auth";
 import { requireOrg } from "@/lib/orgs";
 
-/** 구독 출시 알림 신청 — 개인정보 수집·이용 동의가 있어야만 저장한다 */
 export async function requestSubscriptionNotify(formData: FormData) {
   const agreed = formData.get("privacy_agree") === "on";
   if (!agreed) return;

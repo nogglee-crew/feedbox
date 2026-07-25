@@ -7,16 +7,11 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  /** 확인/취소 버튼 영역. 오른쪽 정렬된다 */
   footer?: ReactNode;
   className?: string;
   children?: ReactNode;
 }
 
-/**
- * 네이티브 <dialog>의 showModal()을 쓴다.
- * 포커스 트랩, 뒤쪽 콘텐츠 inert 처리, Esc 닫기를 브라우저가 담당한다.
- */
 export function Modal({ open, onClose, title, footer, className, children }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -33,7 +28,7 @@ export function Modal({ open, onClose, title, footer, className, children }: Mod
       ref={ref}
       aria-labelledby={titleId}
       onClose={onClose}
-      // 백드롭 클릭 판정. 클릭 대상이 dialog여도 패딩 영역일 수 있어 좌표로 확인한다
+      // The dialog element includes backdrop clicks, so compare pointer coordinates.
       onClick={(e) => {
         const dialog = ref.current;
         if (!dialog || e.target !== dialog) return;

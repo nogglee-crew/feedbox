@@ -6,11 +6,7 @@ import type { FeedboxConfig, FeedboxSessionInfo } from "./types";
 const STORAGE_KEY = "feedbox:session-token";
 const HASH_PARAM = "session";
 
-/**
- * 웹 서비스 루트에 설치하는 FEEDBOX Provider.
- * URL fragment에 #session=... 이 있거나 이전에 검증된 세션이 있으면 오버레이를 활성화한다.
- * 세션이 없으면 아무것도 렌더링하지 않으므로 일반 사용자에게는 영향이 없다.
- */
+/** Activates the overlay from the URL fragment or a previously verified session. */
 export function FeedboxProvider({
   projectKey,
   apiKey,

@@ -50,7 +50,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex items-center gap-2">
             <span className="w-24 text-xs font-semibold text-muted">apiKey</span>
-            {/* 화면 공유/캡처 시 우발적 노출을 막기 위해 앞 3글자만 표시 (복사는 전체 값) */}
+            {/* Limit accidental exposure while preserving full-value copy. */}
             <Code>
               {project.api_key.slice(0, 3)}
               {"•".repeat(12)}

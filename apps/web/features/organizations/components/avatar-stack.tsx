@@ -5,7 +5,6 @@ export function MemberAvatar({ member, className }: { member: OrgMemberProfile; 
   return <Avatar name={member.name ?? member.email} src={member.avatar_url} ring className={className} />;
 }
 
-/** 멤버 프로필 사진을 겹쳐서 나열한다. 예: ((( ) 3명, ( ) 1명 */
 export function AvatarStack({ members, max = 5 }: { members: OrgMemberProfile[]; max?: number }) {
   const shown = members.slice(0, max);
   const rest = members.length - shown.length;

@@ -57,7 +57,6 @@ export default async function TeamsPage() {
               {isOwner && (
                 <form action={renameOrg} className="mt-4 flex items-end gap-2">
                   <input type="hidden" name="org_id" value={org.id} />
-                  {/* 팀마다 같은 폼이 반복되므로 id를 직접 지정해야 라벨이 올바른 입력에 연결된다 */}
                   <Input
                     id={`rename-org-${org.id}`}
                     label="팀 이름 변경"

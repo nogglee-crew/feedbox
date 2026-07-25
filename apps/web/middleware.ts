@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// 로그인 없이 접근 가능한 경로: SDK API(테스터가 호출), 공개 현황판, 데모, 인증 관련
+// Tester-facing and authentication routes bypass dashboard auth.
 const PUBLIC_PATHS = [
   /^\/login/,
   /^\/auth\//,

@@ -82,7 +82,7 @@ export async function addOrganizationMember(input: {
       select: { id: true, role: true },
     });
 
-    // 기존 owner를 member로 바꾸는 경우, 마지막 owner면 조직이 관리 불능이 되므로 막는다
+    // Every organization must retain at least one owner.
     if (existing?.role === "OWNER" && role === "MEMBER") {
       const ownerCount = await tx.organizationMember.count({
         where: { orgId: input.orgId, role: "OWNER" },

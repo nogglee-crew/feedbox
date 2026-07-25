@@ -154,7 +154,7 @@ export function FeedboxOverlay({
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // picking 모드: capture 단계에서 hover/click을 가로채 페이지 동작을 막는다
+  // Capture phase prevents the host page from handling selection clicks.
   useEffect(() => {
     if (mode !== "picking") return;
 

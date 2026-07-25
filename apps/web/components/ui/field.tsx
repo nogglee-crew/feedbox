@@ -4,7 +4,6 @@ import { cn } from "./cn";
 export type ControlSize = "sm" | "md";
 
 export interface FieldProps {
-  /** 컨트롤에도 같은 id를 주어야 라벨이 연결된다 */
   id: string;
   label?: string;
   hint?: string;

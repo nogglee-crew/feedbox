@@ -1,9 +1,6 @@
 import { toCanvas } from "html-to-image";
 
-/**
- * Vercel 서버리스 요청 본문 한도(4.5MB, base64 +33% 고려 시 원본 ~3MB)에 맞추기 위해
- * 긴 변 기준으로 다운스케일하고 JPEG로 압축한다.
- */
+// Leaves headroom under Vercel's 4.5 MB body limit after base64 expansion.
 const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 0.8;
 
@@ -15,11 +12,7 @@ function downscale(source: HTMLCanvasElement, scale: number): HTMLCanvasElement 
   return out;
 }
 
-/**
- * 현재 화면을 JPEG data URL로 캡처한다.
- * SDK 오버레이(data-feedbox 속성)는 캡처에서 제외한다.
- * 외부 이미지 CORS 등으로 실패할 수 있으므로 실패 시 null을 반환한다.
- */
+/** Excludes FEEDBOX UI and returns null when cross-origin content blocks capture. */
 export async function captureScreenshot(): Promise<string | null> {
   try {
     const canvas = await toCanvas(document.body, {

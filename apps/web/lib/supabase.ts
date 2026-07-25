@@ -2,11 +2,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient | null = null;
 
-/** 서버 전용 Supabase 클라이언트 (service_role — 절대 클라이언트로 노출 금지) */
+/** Server-only client with privileged credentials. */
 export function supabaseAdmin(): SupabaseClient {
   if (!client) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    // 새 키 체계(sb_secret_...) 우선, 레거시 service_role JWT도 허용
+    // Keep legacy service-role JWT support during the Supabase key migration.
     const key = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) {
       throw new Error(

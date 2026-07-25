@@ -6,11 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-/**
- * SDK 동작 확인용 데모 페이지.
- * Dashboard에서 프로젝트/릴리즈/세션을 만들고
- * /demo#session=<token> 으로 접속하면 FEEDBOX 오버레이가 활성화된다.
- */
+/** SDK smoke test activated with `/demo#session=<token>`. */
 export default function DemoPage() {
   const [count, setCount] = useState(0);
 

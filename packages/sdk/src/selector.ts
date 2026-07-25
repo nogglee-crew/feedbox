@@ -18,10 +18,7 @@ function segment(el: Element): string {
   return `${tag}:nth-of-type(${siblings.indexOf(el) + 1})`;
 }
 
-/**
- * 요소를 다시 찾을 수 있는 CSS selector를 생성한다.
- * 우선순위: id → data-testid → 고유 attribute 조합 → DOM 경로
- */
+/** Prefers stable identifiers before falling back to a DOM path. */
 export function buildSelector(el: Element): string {
   if (el.id) {
     const s = `#${escape(el.id)}`;
@@ -48,7 +45,6 @@ export function buildSelector(el: Element): string {
   return selector || el.tagName.toLowerCase();
 }
 
-/** 이슈 목록에서 사람이 알아볼 수 있게 요소 텍스트를 요약한다. */
 export function elementText(el: Element): string | null {
   const text = (el.textContent ?? "").trim().replace(/\s+/g, " ");
   if (!text) return null;

@@ -4,10 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-/**
- * Free 플랜 프로젝트 개수 제한 도달 시 표시되는 구독 안내 카드.
- * requested가 true면 이미 알림 신청을 마친 상태.
- */
 export function SubscribeUpsell({
   email,
   orgId,

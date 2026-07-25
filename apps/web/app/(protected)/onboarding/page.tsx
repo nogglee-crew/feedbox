@@ -11,7 +11,7 @@ export default async function OnboardingPage() {
   const user = await getUser();
   if (!user) redirect(isAuthEnabled() ? "/login" : "/projects");
   const ctx = await loadOrgContext();
-  if (ctx !== "no-org") redirect("/projects"); // 이미 조직이 있음
+  if (ctx !== "no-org") redirect("/projects");
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">

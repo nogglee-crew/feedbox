@@ -1,33 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tailwind 기본 팔레트를 비운다. gray-*, indigo-*, red-* 등은 더 이상 해석되지
-   * 않으므로 아래에 정의한 토큰만 사용할 수 있다. */
+  /* Disable Tailwind's default palette so only project tokens compile. */
   --color-*: initial;
 
   --color-transparent: transparent;
   --color-current: currentColor;
   --color-inherit: inherit;
 
-  /* ---------------------------------------------------------------
-   * Typography
-   * Pretendard Variable (45–920). Every Tailwind font-weight step maps
-   * onto the variable axis, so `font-thin`–`font-black` all render.
-   * --------------------------------------------------------------- */
-
+  /* Typography */
   --font-sans:
     "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  /* ---------------------------------------------------------------
-   * Primitives
-   * Raw palette ramps. Use only when no semantic token applies.
-   * --------------------------------------------------------------- */
-
+  /* Primitives */
   --color-white: #fcfcfc;
   --color-black: #0d1117;
 
-  /* neutral (Gray) */
   --color-neutral-50: #f7f8fc;
   --color-neutral-100: #eff1f7;
   --color-neutral-200: #e0e3ec;
@@ -40,7 +29,6 @@
   --color-neutral-900: #141824;
   --color-neutral-950: #0d0c1d;
 
-  /* brand (Indigo) */
   --color-brand-50: #edecff;
   --color-brand-100: #dfdcff;
   --color-brand-200: #c0b9ff;
@@ -53,7 +41,6 @@
   --color-brand-900: #17005f;
   --color-brand-950: #0c003f;
 
-  /* accent (Teal) */
   --color-accent-50: #e6fefb;
   --color-accent-100: #cafef7;
   --color-accent-200: #94fdf1;
@@ -66,7 +53,6 @@
   --color-accent-900: #072d2a;
   --color-accent-950: #031b19;
 
-  /* info (Blue) */
   --color-info-50: #f0f3fe;
   --color-info-100: #e4ebfe;
   --color-info-200: #c8d7fd;
@@ -79,7 +65,6 @@
   --color-info-900: #052144;
   --color-info-950: #02132b;
 
-  /* success (Green) */
   --color-success-50: #effded;
   --color-success-100: #defcda;
   --color-success-200: #b7f9ab;
@@ -92,7 +77,6 @@
   --color-success-900: #162d11;
   --color-success-950: #0b1c09;
 
-  /* danger (Red) */
   --color-danger-50: #fdf1f0;
   --color-danger-100: #fbe3e2;
   --color-danger-200: #f7c2c0;
@@ -105,7 +89,6 @@
   --color-danger-900: #410c07;
   --color-danger-950: #2c0604;
 
-  /* warning (Yellow) */
   --color-warning-50: #fef8f4;
   --color-warning-100: #fdeee2;
   --color-warning-200: #fbe1c9;
@@ -118,14 +101,7 @@
   --color-warning-900: #342209;
   --color-warning-950: #221504;
 
-  /* ---------------------------------------------------------------
-   * Semantic tokens
-   * Components consume these. Intensity ladder per family:
-   *   subtle (배경 틴트) → muted (테두리) → 기본 (채움) → strong (틴트 위 텍스트)
-   * 채움 위 텍스트는 `on-*`. 모든 짝은 WCAG AA를 충족한다.
-   * --------------------------------------------------------------- */
-
-  /* surface */
+  /* Semantic tokens */
   --color-surface: var(--color-white);
   --color-surface-subtle: var(--color-neutral-50);
   --color-surface-muted: var(--color-neutral-100);
@@ -135,20 +111,17 @@
   --color-surface-disabled: var(--color-neutral-100);
   --color-surface-inverse: var(--color-neutral-900);
 
-  /* foreground */
   --color-foreground: var(--color-neutral-900);
   --color-muted: var(--color-neutral-500);
   --color-subtle: var(--color-neutral-400);
   --color-disabled: var(--color-neutral-300);
   --color-on-inverse: var(--color-white);
 
-  /* border */
   --color-border: var(--color-neutral-200);
   --color-border-subtle: var(--color-neutral-100);
   --color-border-strong: var(--color-neutral-300);
   --color-focus: var(--color-brand-500);
 
-  /* primary */
   --color-primary: var(--color-brand-600);
   --color-primary-hover: var(--color-brand-700);
   --color-primary-active: var(--color-brand-800);
@@ -158,7 +131,6 @@
   --color-primary-strong: var(--color-brand-700);
   --color-on-primary: var(--color-white);
 
-  /* danger */
   --color-danger: var(--color-danger-600);
   --color-danger-hover: var(--color-danger-700);
   --color-danger-active: var(--color-danger-800);
@@ -167,21 +139,18 @@
   --color-danger-strong: var(--color-danger-700);
   --color-on-danger: var(--color-white);
 
-  /* success */
   --color-success: var(--color-success-700);
   --color-success-subtle: var(--color-success-50);
   --color-success-muted: var(--color-success-200);
   --color-success-strong: var(--color-success-800);
   --color-on-success: var(--color-white);
 
-  /* warning */
   --color-warning: var(--color-warning-700);
   --color-warning-subtle: var(--color-warning-50);
   --color-warning-muted: var(--color-warning-200);
   --color-warning-strong: var(--color-warning-800);
   --color-on-warning: var(--color-white);
 
-  /* info */
   --color-info: var(--color-info-700);
   --color-info-subtle: var(--color-info-50);
   --color-info-muted: var(--color-info-200);
@@ -196,9 +165,7 @@
     color: var(--color-foreground);
   }
 
-  /* Tailwind v4는 버튼의 기본 커서를 pointer로 두지 않는다.
-   * 컴포넌트마다 cursor-pointer를 붙이는 대신 여기서 한 번에 정의한다.
-   * 유틸리티가 레이어 우선순위로 이기므로 필요한 곳은 개별 override 가능. */
+  /* Tailwind v4 does not assign pointer cursors to enabled controls. */
   button:not(:disabled),
   select:not(:disabled),
   summary,

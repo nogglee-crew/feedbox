@@ -1,7 +1,6 @@
 import { Code } from "@/components/ui/code";
 import type { Issue } from "@/lib/types";
 
-/** UA 문자열을 "Chrome 126 · macOS" 같은 요약으로 변환한다 */
 export function formatBrowser(ua: string | null): string | null {
   if (!ua) return null;
   const browser =
@@ -24,7 +23,6 @@ export function formatBrowser(ua: string | null): string | null {
   return parts.length ? parts.join(" · ") : ua.slice(0, 40);
 }
 
-/** 이슈의 수집 정보(URL/요소/환경)를 라벨-값 그리드로 표시한다 */
 export function IssueMeta({ issue }: { issue: Issue }) {
   const browser = formatBrowser(issue.browser);
   return (

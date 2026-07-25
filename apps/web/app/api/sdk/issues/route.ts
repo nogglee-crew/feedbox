@@ -5,14 +5,14 @@ import {
 } from "@/features/issues/server/sdk-issues";
 import { authenticateSdk, corsJson, corsPreflight } from "@/lib/sdk-auth";
 
-// 세션당 분당 이슈 등록 한도 (스토리지 남용 방지)
+// Bounds per-session storage abuse.
 const RATE_LIMIT_PER_MINUTE = 10;
 
 export async function OPTIONS() {
   return corsPreflight();
 }
 
-// Vercel 서버리스 요청 본문 한도가 4.5MB이므로 그 이하로 잡는다 (SDK가 JPEG 압축해서 보냄)
+// Leaves headroom under Vercel's 4.5 MB request limit.
 const MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024;
 
 function decodeScreenshot(

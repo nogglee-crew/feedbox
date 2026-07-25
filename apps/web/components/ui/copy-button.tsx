@@ -11,7 +11,6 @@ export function CopyButton({
 }: {
   value: string;
   label?: string;
-  /** value가 경로일 때 현재 origin을 붙여 절대 URL로 복사한다 */
   relativeToOrigin?: boolean;
 }) {
   const [copied, setCopied] = useState(false);

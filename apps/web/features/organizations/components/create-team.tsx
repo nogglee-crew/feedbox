@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 
-/** 팀 생성 모달 — 팀 스위처와 팀 관리 페이지에서 재사용 */
 export function CreateTeamModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Modal open={open} onClose={onClose} title="새 팀 만들기">
@@ -31,7 +30,6 @@ export function CreateTeamModal({ open, onClose }: { open: boolean; onClose: () 
   );
 }
 
-/** "팀 생성" 버튼 + 모달 (팀 관리 페이지 헤딩 옆에 배치) */
 export function CreateTeamButton() {
   const [open, setOpen] = useState(false);
   return (

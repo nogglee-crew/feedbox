@@ -40,8 +40,7 @@ export default async function ReleasePage({
 
   const ctx = await requireOrg();
   const [project, release] = await Promise.all([getProject(id), getRelease(releaseId)]);
-  // 프로젝트가 내 조직 소속인지 + 릴리즈가 그 프로젝트 소속인지 모두 확인해야
-  // URL의 releaseId를 다른 조직 것으로 바꿔치기하는 접근을 막을 수 있다
+  // Verify both ownership edges to prevent cross-organization ID substitution.
   if (
     !project ||
     !release ||

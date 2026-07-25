@@ -22,10 +22,6 @@ export interface SdkContext {
   release: Release;
 }
 
-/**
- * SDK 요청 공통 인증: projectKey + apiKey + session token을 검증한다.
- * 실패 시 { error } 를, 성공 시 { context } 를 반환한다.
- */
 export async function authenticateSdk(body: {
   projectKey?: string;
   apiKey?: string;

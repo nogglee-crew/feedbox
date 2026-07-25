@@ -14,14 +14,10 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">
   hint?: string;
   error?: string;
   size?: ControlSize;
-  /** 필드 전체(라벨 포함)에 적용할 레이아웃 클래스 */
   fieldClassName?: string;
 }
 
-/**
- * 라벨을 주면 htmlFor 연결까지 함께 처리한다.
- * id를 생략하면 name을 쓰므로, 한 페이지에 같은 name이 반복되면 id를 직접 넘겨야 한다.
- */
+/** Repeated field names require an explicit id for label association. */
 export function Input({
   label,
   hint,

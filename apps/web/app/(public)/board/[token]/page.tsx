@@ -21,14 +21,10 @@ const STATUS_LABEL: Record<IssueStatus, string> = {
   CLOSED: "종료",
 };
 
-/**
- * 고객사 공유용 이슈 현황판 (로그인 불필요).
- * QA 세션 토큰으로 접근하며, 세션을 종료하면 링크도 무효화된다.
- * 만료된 세션도 조회는 가능 (QA 기간 이후 진행 상황 확인 용도).
- */
 export default async function BoardPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
+  // Expired sessions remain readable for follow-up; revoked sessions do not.
   const session = await getSessionByToken(token);
   if (!session || session.revoked_at) notFound();
 

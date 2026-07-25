@@ -15,12 +15,10 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "siz
   hint?: string;
   error?: string;
   size?: ControlSize;
-  /** 값 왼쪽에 놓을 상태 점 등 */
   adornment?: ReactNode;
   fieldClassName?: string;
 }
 
-/** 브라우저마다 제각각인 기본 화살표를 감추고 Heroicons 셰브런으로 통일한다 */
 export function Select({
   label,
   hint,

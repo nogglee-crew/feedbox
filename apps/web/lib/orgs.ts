@@ -16,7 +16,6 @@ export interface OrgContext {
   org: Organization;
   role: OrgRole;
   orgs: Organization[];
-  /** 내가 속한 모든 팀과 각 팀에서의 내 역할 */
   memberships: OrgMembershipSummary[];
   email: string;
 }
@@ -47,10 +46,6 @@ function isDashboardEmailAllowed(email: string): boolean {
   return allowed.length === 0 || allowed.includes(email);
 }
 
-/**
- * 로그인 사용자의 조직 컨텍스트.
- * - 소속 조직 없음: "no-org"
- */
 export const loadOrgContext = cache(async function loadOrgContext(): Promise<OrgContext | "no-org"> {
   if (!isAuthEnabled()) {
     throw new Error("Supabase Auth environment variables are required");
@@ -70,7 +65,7 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
   });
   if (rows.length === 0) return "no-org";
 
-  // 첫 로그인 시 user_id 클레임 + Google 프로필(이름/사진)이 바뀌었으면 동기화
+  // Bind invited memberships and refresh mutable Google profile fields.
   const needsSync = rows.some(
     (row) => row.authUserId === null || row.name !== user.name || row.avatarUrl !== user.avatarUrl,
   );
@@ -95,7 +90,6 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
   };
 });
 
-/** 조직이 필요한 페이지 가드. 조직이 없으면 온보딩으로 보낸다. */
 export async function requireOrg(): Promise<OrgContext> {
   const ctx = await loadOrgContext();
   if (ctx === "no-org") redirect("/onboarding");
@@ -119,7 +113,6 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
   }));
 }
 
-/** 현재 사용자가 해당 조직의 owner인지 검증한다 (액션용) */
 export async function assertOwner(orgId: string): Promise<string> {
   const user = await getUser();
   if (!user?.email) redirect("/login");

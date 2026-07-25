@@ -36,10 +36,6 @@ export function IssueStatusSelect({ issueId, status }: { issueId: number; status
   );
 }
 
-/**
- * 담당자 지정.
- * 멤버 목록이 있으면 select를, 없으면 자유 입력을 사용한다.
- */
 export function AssigneeControl({
   issueId,
   assignee,
@@ -53,7 +49,7 @@ export function AssigneeControl({
   const [pending, startTransition] = useTransition();
 
   if (members) {
-    // 과거 데이터가 멤버 목록에 없어도 선택지에 남겨 보여준다
+    // Preserve legacy assignees that are no longer organization members.
     const options = assignee && !members.includes(assignee) ? [assignee, ...members] : members;
     return (
       <Select

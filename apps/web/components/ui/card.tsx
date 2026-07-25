@@ -10,10 +10,6 @@ const PADDING: Record<CardPadding, string> = {
   lg: "p-6",
 };
 
-/**
- * 면 분리는 그림자가 아니라 테두리로 한다. 그림자는 오버레이 전용이다.
- * form·ul·li처럼 div가 아닌 요소를 카드로 만들 때 쓴다.
- */
 export function cardClasses(padding: CardPadding = "md"): string {
   return cn("rounded-xl border border-border bg-surface", PADDING[padding]);
 }

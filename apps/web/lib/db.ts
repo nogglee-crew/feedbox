@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient(): PrismaClient {
   let connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    // 프로덕션에서 조용히 localhost로 붙으면 원인 파악이 어려우므로 즉시 실패시킨다
+    // Never fall back to localhost in production.
     if (process.env.NODE_ENV === "production") {
       throw new Error("DATABASE_URL 환경변수가 필요합니다");
     }
