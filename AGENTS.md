@@ -6,9 +6,10 @@ Guidelines for agents working in FEEDBOX. Favor caution over speed, but use judg
 
 1. Confirm the task and success criteria.
 2. Read `ARCHITECTURE.md` for structural, auth, database, SDK, or deployment work.
-3. Inspect `git status`; preserve changes you did not create.
-4. Read only task-relevant files before editing.
-5. Plan briefly when work has multiple dependent steps.
+3. Read `DESIGN.md` for UI, component, or styling work.
+4. Inspect `git status`; preserve changes you did not create.
+5. Read only task-relevant files before editing.
+6. Plan briefly when work has multiple dependent steps.
 
 Project invariants:
 
@@ -50,6 +51,7 @@ If the solution is much larger than expected, re-evaluate the boundary.
 Touch only files required by the task.
 
 - Match existing style and naming.
+- Keep comments only when they explain non-obvious intent or constraints; do not narrate code or leave verbose explanations.
 - Do not refactor, format, delete, stage, or commit unrelated work.
 - Remove only code made obsolete by your changes.
 - Treat client-provided IDs as untrusted and re-check ownership in mutation usecases.

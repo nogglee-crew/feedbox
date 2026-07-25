@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { renameOrg } from "@/app/org-actions";
-import { AvatarStack } from "@/components/avatar-stack";
-import { PlanBadge, RoleBadge } from "@/components/badge";
-import { CreateTeamButton } from "@/components/create-team";
+import { AvatarStack } from "@/features/organizations/components/avatar-stack";
+import { PlanBadge } from "@/features/billing/components/plan-badge";
+import { RoleBadge } from "@/features/organizations/components/role-badge";
+import { CreateTeamButton } from "@/features/organizations/components/create-team";
+import { Button, buttonClasses } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { listOrgMembers, requireOrg } from "@/lib/orgs";
 
@@ -36,7 +40,7 @@ export default async function TeamsPage() {
           const isActive = org.id === ctx.org.id;
           const isOwner = role === "owner";
           return (
-            <li key={org.id} className="rounded-xl border border-border bg-surface p-5">
+            <li key={org.id} className={cardClasses()}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{org.name}</span>
@@ -44,10 +48,7 @@ export default async function TeamsPage() {
                   <RoleBadge role={role} />
                 </div>
                 {isActive && (
-                  <Link
-                    href="/settings/members"
-                    className="rounded-md border border-border-strong px-3 py-1.5 text-xs font-semibold hover:bg-surface-hover"
-                  >
+                  <Link href="/settings/members" className={buttonClasses("secondary", "sm")}>
                     멤버 관리
                   </Link>
                 )}
@@ -56,17 +57,15 @@ export default async function TeamsPage() {
               {isOwner && (
                 <form action={renameOrg} className="mt-4 flex items-end gap-2">
                   <input type="hidden" name="org_id" value={org.id} />
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted">팀 이름 변경</label>
-                    <input
-                      name="name"
-                      defaultValue={org.name}
-                      className="w-64 rounded-md border border-border-strong px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <button className="rounded-md border border-border-strong px-3 py-2 text-sm hover:bg-surface-hover">
-                    저장
-                  </button>
+                  {/* 팀마다 같은 폼이 반복되므로 id를 직접 지정해야 라벨이 올바른 입력에 연결된다 */}
+                  <Input
+                    id={`rename-org-${org.id}`}
+                    label="팀 이름 변경"
+                    name="name"
+                    defaultValue={org.name}
+                    className="w-64"
+                  />
+                  <Button type="submit">저장</Button>
                 </form>
               )}
 

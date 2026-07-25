@@ -3,6 +3,8 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
 
 function LoginContent() {
   const [loading, setLoading] = useState(false);
@@ -31,26 +33,24 @@ function LoginContent() {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="w-full max-w-sm space-y-6 rounded-2xl border border-gray-200 bg-white p-8 text-center">
+      <div className={`${cardClasses("lg")} w-full max-w-sm space-y-6 text-center`}>
         <div>
           <h1 className="text-xl font-bold">FEEDBOX</h1>
-          <p className="mt-1 text-sm text-gray-500">팀 계정으로 로그인하세요</p>
+          <p className="mt-1 text-sm text-muted">팀 계정으로 로그인하세요</p>
         </div>
 
         {denied && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p role="alert" className="rounded-lg bg-surface-muted p-3 text-sm text-danger">
             접근 권한이 없는 계정입니다. 관리자에게 문의하세요.
-          </div>
+          </p>
         )}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          <p role="alert" className="rounded-lg bg-surface-muted p-3 text-sm text-danger">
+            {error}
+          </p>
         )}
 
-        <button
-          onClick={signIn}
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold hover:bg-gray-50 disabled:opacity-50"
-        >
+        <Button onClick={signIn} disabled={loading} className="w-full gap-3 py-2.5">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z" />
@@ -58,7 +58,7 @@ function LoginContent() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52Z" />
           </svg>
           {loading ? "이동 중..." : "Google로 로그인"}
-        </button>
+        </Button>
       </div>
     </div>
   );

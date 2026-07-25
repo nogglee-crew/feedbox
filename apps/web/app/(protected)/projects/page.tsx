@@ -1,12 +1,17 @@
 import Link from "next/link";
+import { HiChevronRight } from "react-icons/hi2";
 import { createProject } from "@/app/actions";
-import { SubscribeUpsell } from "@/components/subscribe-upsell";
-import { projectLimit } from "@/features/billing/domain/entitlements";
+import { SubscribeUpsell } from "@/features/billing/components/subscribe-upsell";
+import { TeamSwitcher } from "@/features/organizations/components/team-switcher";
+import { Button } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
+import { Code } from "@/components/ui/code";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { hasPaidAccess, projectLimit } from "@/features/billing/domain/entitlements";
 import { hasSubscriptionInterest } from "@/features/billing/server/subscription-interest";
-import { requireOrg } from "@/lib/orgs";
-import { TeamSwitcher } from "@/components/team-switcher";
-import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { listProjectsForOrg } from "@/features/projects/server/queries";
+import { requireOrg } from "@/lib/orgs";
 
 export const dynamic = "force-dynamic";
 
@@ -40,48 +45,39 @@ export default async function ProjectsPage() {
       {limitReached ? (
         <SubscribeUpsell email={ctx.email} orgId={ctx.org.id} requested={subscribeRequested} />
       ) : (
-      <form action={createProject} className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-muted">프로젝트 이름</label>
-          <input
-            name="name"
-            required
-            placeholder="예: ATOZ ERP"
-            className="rounded-md border border-border-strong px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-muted">서비스 URL (QA 링크 생성용, 선택)</label>
-          <input
+        <form action={createProject} className={`${cardClasses("sm")} flex flex-wrap items-end gap-3`}>
+          <Input label="프로젝트 이름" name="name" required placeholder="예: ATOZ ERP" />
+          <Input
+            label="서비스 URL (QA 링크 생성용, 선택)"
             name="base_url"
             placeholder="https://staging.company.com"
-            className="w-72 rounded-md border border-border-strong px-3 py-2 text-sm"
+            className="w-72"
           />
-        </div>
-        <button className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover">
-          프로젝트 생성
-        </button>
-      </form>
+          <Button type="submit" variant="primary">
+            프로젝트 생성
+          </Button>
+        </form>
       )}
 
-      <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
+      <ul className={`${cardClasses("none")} divide-y divide-border`}>
         {(projects ?? []).map((p) => (
           <li key={p.id}>
-            <Link href={`/projects/${p.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-surface-hover">
-              <div>
+            <Link
+              href={`/projects/${p.id}`}
+              className="flex items-center justify-between px-5 py-4 hover:bg-surface-hover"
+            >
+              <div className="min-w-0">
                 <div className="font-semibold">{p.name}</div>
-                <div className="mt-0.5 text-xs text-muted">
-                  key: <code>{p.project_key}</code>
-                  {p.base_url && <> · {p.base_url}</>}
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
+                  key: <Code>{p.project_key}</Code>
+                  {p.base_url && <span className="truncate">· {p.base_url}</span>}
                 </div>
               </div>
-              <span className="text-sm text-subtle">→</span>
+              <HiChevronRight aria-hidden className="size-4 shrink-0 text-subtle" />
             </Link>
           </li>
         ))}
-        {(!projects || projects.length === 0) && (
-          <li className="px-5 py-10 text-center text-sm text-subtle">아직 프로젝트가 없습니다.</li>
-        )}
+        {(!projects || projects.length === 0) && <EmptyState>아직 프로젝트가 없습니다.</EmptyState>}
       </ul>
     </div>
   );

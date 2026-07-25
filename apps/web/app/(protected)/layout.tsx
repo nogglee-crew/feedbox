@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ProfileMenu } from "@/components/profile-menu";
+import { ProfileMenu } from "@/features/account/components/profile-menu";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { getUser } from "@/lib/auth";
 import { loadOrgContext } from "@/lib/orgs";

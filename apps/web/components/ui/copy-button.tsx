@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { HiCheck, HiOutlineClipboard } from "react-icons/hi2";
+import { Button } from "@/components/ui/button";
 
 export function CopyButton({
   value,
@@ -14,9 +16,10 @@ export function CopyButton({
 }) {
   const [copied, setCopied] = useState(false);
   return (
-    <button
-      type="button"
-      className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100"
+    <Button
+      size="sm"
+      variant="ghost"
+      className="text-muted"
       onClick={async () => {
         const text = relativeToOrigin ? `${window.location.origin}${value}` : value;
         await navigator.clipboard.writeText(text);
@@ -24,7 +27,12 @@ export function CopyButton({
         setTimeout(() => setCopied(false), 1500);
       }}
     >
+      {copied ? (
+        <HiCheck aria-hidden className="size-3.5 text-success" />
+      ) : (
+        <HiOutlineClipboard aria-hidden className="size-3.5" />
+      )}
       {copied ? "복사됨!" : label}
-    </button>
+    </Button>
   );
 }

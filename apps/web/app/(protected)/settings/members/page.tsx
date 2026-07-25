@@ -1,6 +1,10 @@
 import { addOrgMember, removeOrgMember } from "@/app/org-actions";
-import { MemberAvatar } from "@/components/avatar-stack";
-import { RoleBadge } from "@/components/badge";
+import { MemberAvatar } from "@/features/organizations/components/avatar-stack";
+import { RoleBadge } from "@/features/organizations/components/role-badge";
+import { Button } from "@/components/ui/button";
+import { cardClasses } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { listOrgMembers, requireOrg } from "@/lib/orgs";
 
 export const dynamic = "force-dynamic";
@@ -21,32 +25,27 @@ export default async function MembersPage() {
       </div>
 
       {isOwner && (
-        <form action={addOrgMember} className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
+        <form action={addOrgMember} className={`${cardClasses("sm")} flex flex-wrap items-end gap-3`}>
           <input type="hidden" name="org_id" value={ctx.org.id} />
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted">이메일 (Google 계정)</label>
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="teammate@company.com"
-              className="w-72 rounded-md border border-border-strong px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted">역할</label>
-            <select name="role" className="rounded-md border border-border-strong px-2 py-2 text-sm">
-              <option value="member">member</option>
-              <option value="owner">owner</option>
-            </select>
-          </div>
-          <button className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover">
+          <Input
+            label="이메일 (Google 계정)"
+            name="email"
+            type="email"
+            required
+            placeholder="teammate@company.com"
+            className="w-72"
+          />
+          <Select label="역할" name="role">
+            <option value="member">member</option>
+            <option value="owner">owner</option>
+          </Select>
+          <Button type="submit" variant="primary">
             멤버 추가
-          </button>
+          </Button>
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+      <div className={`${cardClasses("none")} overflow-x-auto`}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
@@ -85,9 +84,9 @@ export default async function MembersPage() {
                       <form action={removeOrgMember}>
                         <input type="hidden" name="org_id" value={ctx.org.id} />
                         <input type="hidden" name="member_id" value={m.id} />
-                        <button className="rounded-md border border-danger-muted px-2 py-1 text-xs text-danger hover:bg-danger-subtle">
+                        <Button type="submit" size="sm" variant="danger">
                           삭제
-                        </button>
+                        </Button>
                       </form>
                     )}
                   </td>

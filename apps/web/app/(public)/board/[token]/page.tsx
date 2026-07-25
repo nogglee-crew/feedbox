@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
-import { IssueMeta } from "@/components/issue-meta";
+import { IssueMeta } from "@/features/issues/components/issue-meta";
+import { ISSUE_STATUS_TONE, IssueStatusBadge } from "@/features/issues/components/issue-status";
+import { Dot } from "@/components/ui/badge";
+import { Card, cardClasses } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   getProject,
   getRelease,
@@ -15,13 +19,6 @@ const STATUS_LABEL: Record<IssueStatus, string> = {
   IN_PROGRESS: "처리 중",
   DONE: "처리 완료",
   CLOSED: "종료",
-};
-
-const STATUS_BADGE: Record<IssueStatus, string> = {
-  OPEN: "bg-red-50 text-red-700",
-  IN_PROGRESS: "bg-amber-50 text-amber-700",
-  DONE: "bg-emerald-50 text-emerald-700",
-  CLOSED: "bg-gray-100 text-gray-500",
 };
 
 /**
@@ -50,37 +47,36 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm text-gray-400">QA 이슈 현황</p>
+        <p className="text-sm text-subtle">QA 이슈 현황</p>
         <h1 className="text-2xl font-bold">
-          {project.name} <span className="text-gray-400">·</span> {release.version}
+          {project.name} <span className="text-subtle">·</span> {release.version}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted">
           전체 {issues.length}건 중 {resolved}건 처리 완료
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {ISSUE_STATUSES.map((s) => (
-          <div key={s} className="rounded-xl border border-gray-200 bg-white p-4">
-            <div className="text-xs font-semibold text-gray-500">{STATUS_LABEL[s]}</div>
+          <Card key={s} padding="sm">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted">
+              <Dot tone={ISSUE_STATUS_TONE[s]} />
+              {STATUS_LABEL[s]}
+            </div>
             <div className="mt-1 text-2xl font-bold">{counts[s]}</div>
-          </div>
+          </Card>
         ))}
       </div>
 
       <ul className="space-y-3">
         {issues.map((issue) => (
-          <li key={issue.id} className="rounded-xl border border-gray-200 bg-white p-5">
+          <li key={issue.id} className={cardClasses()}>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold">#{issue.id}</span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_BADGE[issue.status]}`}
-                  >
-                    {STATUS_LABEL[issue.status]}
-                  </span>
-                  <span className="text-xs text-gray-400">
+                  <IssueStatusBadge status={issue.status} label={STATUS_LABEL[issue.status]} />
+                  <span className="text-xs text-subtle">
                     {new Date(issue.created_at).toLocaleString("ko-KR")}
                   </span>
                 </div>
@@ -94,20 +90,20 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
                 <img
                   src={issue.screenshot_url}
                   alt={`이슈 #${issue.id} 스크린샷`}
-                  className="max-h-48 rounded-lg border border-gray-200 object-contain"
+                  className="max-h-48 rounded-lg border border-border object-contain"
                 />
               </a>
             )}
           </li>
         ))}
         {issues.length === 0 && (
-          <li className="rounded-xl border border-gray-200 bg-white px-5 py-10 text-center text-sm text-gray-400">
-            아직 등록된 이슈가 없습니다.
+          <li className={cardClasses("none")}>
+            <EmptyState>아직 등록된 이슈가 없습니다.</EmptyState>
           </li>
         )}
       </ul>
 
-      <p className="text-center text-xs text-gray-400">
+      <p className="text-center text-xs text-subtle">
         이 페이지는 읽기 전용입니다 · QA 세션 만료: {new Date(session.expires_at).toLocaleDateString("ko-KR")}
       </p>
     </div>
