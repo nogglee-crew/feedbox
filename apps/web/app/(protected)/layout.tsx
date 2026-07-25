@@ -14,7 +14,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   return (
     <>
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <Link href="/projects" className="text-lg font-bold">
             FEEDBOX
@@ -28,7 +28,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 ? {
                     name: orgCtx.org.name,
                     paid: hasPaidAccess(orgCtx.org),
-                    role: orgCtx.role,
                   }
                 : null
             }

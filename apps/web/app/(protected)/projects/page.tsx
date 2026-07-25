@@ -4,7 +4,7 @@ import { SubscribeUpsell } from "@/components/subscribe-upsell";
 import { projectLimit } from "@/features/billing/domain/entitlements";
 import { hasSubscriptionInterest } from "@/features/billing/server/subscription-interest";
 import { requireOrg } from "@/lib/orgs";
-import { PlanBadge } from "@/components/badge";
+import { TeamSwitcher } from "@/components/team-switcher";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { listProjectsForOrg } from "@/features/projects/server/queries";
 
@@ -23,11 +23,16 @@ export default async function ProjectsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{ctx.org.name}</h1>
-          <PlanBadge paid={hasPaidAccess(ctx.org)} />
-        </div>
-        <p className="mt-1 text-sm text-gray-500">
+        <TeamSwitcher
+          teams={ctx.memberships.map(({ org, role }) => ({
+            id: org.id,
+            name: org.name,
+            paid: hasPaidAccess(org),
+            role,
+          }))}
+          activeId={ctx.org.id}
+        />
+        <p className="mt-1 text-sm text-muted">
           이 팀의 프로젝트 목록입니다. SDK를 설치할 웹 서비스 단위로 프로젝트를 만듭니다.
         </p>
       </div>
@@ -35,47 +40,47 @@ export default async function ProjectsPage() {
       {limitReached ? (
         <SubscribeUpsell email={ctx.email} orgId={ctx.org.id} requested={subscribeRequested} />
       ) : (
-      <form action={createProject} className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4">
+      <form action={createProject} className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-600">프로젝트 이름</label>
+          <label className="text-xs font-semibold text-muted">프로젝트 이름</label>
           <input
             name="name"
             required
             placeholder="예: ATOZ ERP"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="rounded-md border border-border-strong px-3 py-2 text-sm"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-600">서비스 URL (QA 링크 생성용, 선택)</label>
+          <label className="text-xs font-semibold text-muted">서비스 URL (QA 링크 생성용, 선택)</label>
           <input
             name="base_url"
             placeholder="https://staging.company.com"
-            className="w-72 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            className="w-72 rounded-md border border-border-strong px-3 py-2 text-sm"
           />
         </div>
-        <button className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+        <button className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover">
           프로젝트 생성
         </button>
       </form>
       )}
 
-      <ul className="divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white">
+      <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
         {(projects ?? []).map((p) => (
           <li key={p.id}>
-            <Link href={`/projects/${p.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50">
+            <Link href={`/projects/${p.id}`} className="flex items-center justify-between px-5 py-4 hover:bg-surface-hover">
               <div>
                 <div className="font-semibold">{p.name}</div>
-                <div className="mt-0.5 text-xs text-gray-500">
+                <div className="mt-0.5 text-xs text-muted">
                   key: <code>{p.project_key}</code>
                   {p.base_url && <> · {p.base_url}</>}
                 </div>
               </div>
-              <span className="text-sm text-gray-400">→</span>
+              <span className="text-sm text-subtle">→</span>
             </Link>
           </li>
         ))}
         {(!projects || projects.length === 0) && (
-          <li className="px-5 py-10 text-center text-sm text-gray-400">아직 프로젝트가 없습니다.</li>
+          <li className="px-5 py-10 text-center text-sm text-subtle">아직 프로젝트가 없습니다.</li>
         )}
       </ul>
     </div>

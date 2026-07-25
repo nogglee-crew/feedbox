@@ -9,10 +9,16 @@ export interface Organization {
 
 export type OrgRole = "owner" | "member";
 
-export interface OrgMember {
+export interface OrgMemberProfile {
+  email: string;
+  /** 로그인 시 Google에서 동기화. 미로그인 초대 멤버는 null → 이니셜 fallback */
+  name: string | null;
+  avatar_url: string | null;
+}
+
+export interface OrgMember extends OrgMemberProfile {
   id: string;
   org_id: string;
-  email: string;
   user_id: string | null;
   role: OrgRole;
   created_at: string;

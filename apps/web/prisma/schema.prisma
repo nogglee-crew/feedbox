@@ -66,6 +66,9 @@ model OrganizationMember {
   orgId      String           @map("org_id") @db.Uuid
   authUserId String?          @map("auth_user_id") @db.Uuid
   email      String
+  // 로그인 시 Google 계정에서 동기화. 미로그인(초대만 된) 멤버는 null → 이니셜 fallback
+  name       String?
+  avatarUrl  String?          @map("avatar_url")
   role       OrganizationRole @default(MEMBER)
   createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)

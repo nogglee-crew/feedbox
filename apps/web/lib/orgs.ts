@@ -70,10 +70,14 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
   });
   if (rows.length === 0) return "no-org";
 
-  if (rows.some((row) => row.authUserId === null)) {
+  // 첫 로그인 시 user_id 클레임 + Google 프로필(이름/사진)이 바뀌었으면 동기화
+  const needsSync = rows.some(
+    (row) => row.authUserId === null || row.name !== user.name || row.avatarUrl !== user.avatarUrl,
+  );
+  if (needsSync) {
     await prisma.organizationMember.updateMany({
-      where: { email, authUserId: null },
-      data: { authUserId: user.id },
+      where: { OR: [{ authUserId: user.id }, { email }] },
+      data: { authUserId: user.id, name: user.name, avatarUrl: user.avatarUrl },
     });
   }
 
@@ -107,6 +111,8 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
     id: row.id,
     org_id: row.orgId,
     email: row.email,
+    name: row.name,
+    avatar_url: row.avatarUrl,
     user_id: row.authUserId,
     role: row.role === "OWNER" ? "owner" : "member",
     created_at: row.createdAt.toISOString(),
