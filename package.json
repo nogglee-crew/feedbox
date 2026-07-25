@@ -8,7 +8,7 @@
     "dev": "pnpm --filter web dev",
     "dev:sdk": "pnpm --filter @nogglee/feedbox dev",
     "prepare": "node scripts/setup-git-hooks.mjs",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm --filter @nogglee/feedbox build && pnpm -r typecheck"
   },
   "packageManager": "pnpm@10.33.0"
 }
