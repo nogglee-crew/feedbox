@@ -10,6 +10,7 @@ import {
   isOrganizationSlugAvailable,
   removeOrganizationMember,
   renameOrganization,
+  transferOwnership,
   updateOrganizationSlug,
 } from "@/features/organizations/server/use-cases";
 import { setFlashToast } from "@/lib/flash-toast";
@@ -75,6 +76,18 @@ export async function addOrgMember(formData: FormData) {
   await addOrganizationMember({ orgId, email, role });
   await setFlashToast("멤버를 추가했습니다");
   revalidatePath("/", "layout");
+}
+
+export async function transferOwnershipAction(formData: FormData) {
+  const orgId = String(formData.get("org_id") ?? "");
+  const orgSlug = String(formData.get("org_slug") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!orgId || !email || !email.includes("@")) return;
+  await transferOwnership({ orgId, email });
+  await setFlashToast("소유권을 이전했습니다. 회원님은 이제 member입니다.");
+  revalidatePath("/", "layout");
+  // 요청자는 이제 member라 멤버 관리 권한이 없으므로 팀 관리 페이지로 보낸다
+  redirect(orgSlug ? `/${orgSlug}/settings/teams` : "/projects");
 }
 
 export async function removeOrgMember(formData: FormData) {

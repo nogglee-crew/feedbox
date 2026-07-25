@@ -1,9 +1,8 @@
-import { addOrgMember, removeOrgMember } from "@/app/org-actions";
+import { removeOrgMember } from "@/app/org-actions";
+import { AddMemberForm } from "@/features/organizations/components/add-member-form";
 import { MemberAvatar } from "@/features/organizations/components/avatar-stack";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { cardClasses } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { listOrgMembers, requireOrgBySlug } from "@/lib/orgs";
 
@@ -36,26 +35,7 @@ export default async function MembersPage({
       </div>
 
       {isOwner && (
-        <form
-          action={addOrgMember}
-          className={`${cardClasses("sm")} flex flex-wrap items-end gap-3`}
-        >
-          <input type="hidden" name="org_id" value={ctx.org.id} />
-          <input type="hidden" name="org_slug" value={ctx.org.slug} />
-          <Input
-            label="이메일 (Google 계정)"
-            name="email"
-            type="email"
-            required
-            placeholder="teammate@company.com"
-            className="w-72"
-          />
-          <Select label="역할" name="role">
-            <option value="member">member</option>
-            <option value="owner">owner</option>
-          </Select>
-          <SubmitButton pendingText="추가 중...">멤버 추가</SubmitButton>
-        </form>
+        <AddMemberForm orgId={ctx.org.id} orgSlug={ctx.org.slug} callerEmail={ctx.email} />
       )}
 
       <div className={`${cardClasses("none")} overflow-x-auto`}>

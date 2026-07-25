@@ -198,6 +198,32 @@ export async function addOrganizationMember(input: {
   });
 }
 
+/**
+ * 소유권 이전: 대상을 owner로 올리고, 요청한 현재 owner를 member로 강등한다.
+ * 팀은 owner 1명을 유지하므로 승격과 강등을 한 트랜잭션에서 처리한다.
+ */
+export async function transferOwnership(input: { orgId: string; email: string }): Promise<void> {
+  const callerEmail = await assertOwner(input.orgId);
+  const target = normalizeEmail(input.email);
+  if (target === callerEmail) {
+    throw new Error("이미 owner입니다");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    // 대상 승격 (초대만 된 이메일이면 새로 만든다)
+    await tx.organizationMember.upsert({
+      where: { orgId_email: { orgId: input.orgId, email: target } },
+      update: { role: "OWNER" },
+      create: { orgId: input.orgId, email: target, role: "OWNER" },
+    });
+    // 요청자 강등
+    await tx.organizationMember.updateMany({
+      where: { orgId: input.orgId, email: callerEmail },
+      data: { role: "MEMBER" },
+    });
+  });
+}
+
 export async function removeOrganizationMember(input: {
   orgId: string;
   memberId: string;
