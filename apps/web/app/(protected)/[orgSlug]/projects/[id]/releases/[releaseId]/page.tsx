@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revokeQaSession } from "@/app/actions";
 import { CopyButton } from "@/components/ui/copy-button";
-import { IssueCard } from "@/features/issues/components/issue-card";
+import { DashboardIssueList } from "@/features/issues/components/dashboard-issue-list";
 import { IssueFilters } from "@/features/issues/components/issue-filters";
+import { toDashboardItem } from "@/features/issues/server/issue-items";
 import { CreateQaSessionButton } from "@/features/projects/components/create-qa-session-button";
 import { QaSessionAccessToggle } from "@/features/projects/components/qa-session-access-toggle";
 import { StatusBadge } from "@/components/ui/badge";
@@ -13,9 +14,10 @@ import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
+  countIssuesByStatus,
   getProject,
   getRelease,
-  listIssues,
+  listIssuesPage,
   listSessions,
 } from "@/features/projects/server/queries";
 import { listOrgMembers, requireOrgBySlug } from "@/lib/orgs";
@@ -61,16 +63,17 @@ export default async function ReleasePage({
     notFound();
   }
 
-  const [members, issues, sessions] = await Promise.all([
+  const activeStatus = ISSUE_STATUSES.includes(statusFilter as IssueStatus)
+    ? (statusFilter as IssueStatus)
+    : undefined;
+  const [members, issuePage, issueCount, sessions] = await Promise.all([
     listOrgMembers(ctx.org.id),
-    listIssues(releaseId, {
-      status: ISSUE_STATUSES.includes(statusFilter as IssueStatus)
-        ? (statusFilter as IssueStatus)
-        : undefined,
-      q: q || undefined,
-    }),
+    listIssuesPage(releaseId, { status: activeStatus, q: q || undefined }),
+    countIssuesByStatus(releaseId, { q: q || undefined }),
     listSessions(releaseId),
   ]);
+  const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + issueCount[s], 0);
+  const initialItems = issuePage.issues.map(toDashboardItem);
 
   const now = Date.now();
 
@@ -144,27 +147,20 @@ export default async function ReleasePage({
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <h2 className="shrink-0 text-lg font-bold">
-            이슈 <span className="font-normal text-muted">{issues?.length ?? 0}건</span>
+            이슈 <span className="font-normal text-muted">{totalIssues}건</span>
           </h2>
           <IssueFilters q={q} status={statusFilter} />
         </div>
 
-        <ul className="space-y-3">
-          {(issues ?? []).map((issue) => (
-            <IssueCard
-              key={issue.id}
-              issue={issue}
-              members={members}
-              orgSlug={ctx.org.slug}
-              createdAtLabel={new Date(issue.created_at).toLocaleString("ko-KR")}
-            />
-          ))}
-          {(!issues || issues.length === 0) && (
-            <li className={cardClasses("none")}>
-              <EmptyState>아직 등록된 이슈가 없습니다.</EmptyState>
-            </li>
-          )}
-        </ul>
+        <DashboardIssueList
+          orgSlug={ctx.org.slug}
+          releaseId={releaseId}
+          status={statusFilter ?? ""}
+          q={q ?? ""}
+          members={members}
+          initialItems={initialItems}
+          initialCursor={issuePage.nextCursor}
+        />
       </section>
     </div>
   );

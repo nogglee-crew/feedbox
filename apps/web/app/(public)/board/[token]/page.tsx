@@ -5,13 +5,15 @@ import { MadeByBadge } from "@/components/made-by-badge";
 import { Tag } from "@/components/ui/badge";
 import { AnchorButton } from "@/components/ui/button";
 import { IssueBoard } from "@/features/issues/components/issue-board";
+import { toBoardItem } from "@/features/issues/server/issue-items";
 import {
+  countIssuesByStatus,
   getProject,
   getRelease,
   getSessionByToken,
-  listIssues,
+  listIssuesPage,
 } from "@/features/projects/server/queries";
-import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
+import { ISSUE_STATUSES } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -32,16 +34,17 @@ export async function generateMetadata({
   const noIndex = { robots: { index: false, follow: false } };
   if (!session) return { title: "이슈 보드", ...noIndex };
 
-  const [project, release, issues] = await Promise.all([
+  const [project, release, counts] = await Promise.all([
     getProject(session.project_id),
     getRelease(session.release_id),
-    listIssues(session.release_id, { sessionId: session.id }),
+    countIssuesByStatus(session.release_id, { sessionId: session.id }),
   ]);
   if (!project || !release) return { title: "이슈 보드", ...noIndex };
 
-  const resolved = issues.filter((i) => i.status === "DONE" || i.status === "CLOSED").length;
+  const total = ISSUE_STATUSES.reduce((sum, s) => sum + counts[s], 0);
+  const resolved = counts.DONE + counts.CLOSED;
   const title = `${project.name} ${release.version} 이슈 보드`;
-  const description = `전체 ${issues.length}건 중 ${resolved}건 처리 완료`;
+  const description = `전체 ${total}건 중 ${resolved}건 처리 완료`;
 
   return {
     title,
@@ -58,27 +61,18 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
   const session = await getSessionByToken(token);
   if (!session) notFound();
 
-  const [project, release, issues] = await Promise.all([
+  const [project, release, issuePage, counts] = await Promise.all([
     getProject(session.project_id),
     getRelease(session.release_id),
-    listIssues(session.release_id, { sessionId: session.id }),
+    listIssuesPage(session.release_id, { sessionId: session.id }),
+    countIssuesByStatus(session.release_id, { sessionId: session.id }),
   ]);
   if (!project || !release) notFound();
 
-  const counts = Object.fromEntries(
-    ISSUE_STATUSES.map((s) => [s, issues.filter((i) => i.status === s).length]),
-  ) as Record<IssueStatus, number>;
+  const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + counts[s], 0);
   const resolved = counts.DONE + counts.CLOSED;
   const sessionExpiresAt = new Date(session.expires_at).toLocaleDateString("ko-KR");
-  const boardIssues = issues.map((issue) => {
-    const createdAt = new Date(issue.created_at);
-    return {
-      issue,
-      createdAtLabel: createdAt.toLocaleString("ko-KR"),
-      createdDateLabel: createdAt.toLocaleDateString("ko-KR"),
-      createdTimeLabel: createdAt.toLocaleTimeString("ko-KR"),
-    };
-  });
+  const boardIssues = issuePage.issues.map(toBoardItem);
   const feedbackUrl = qaUrl(project.base_url, session.token);
 
   return (
@@ -102,7 +96,7 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
         <div className="space-y-2">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
             <p className="text-muted">
-              전체 {issues.length}건 중 <b className="text-foreground">{resolved}건</b> 처리 완료
+              전체 {totalIssues}건 중 <b className="text-foreground">{resolved}건</b> 처리 완료
             </p>
             <p className="text-xs text-subtle">{sessionExpiresAt} 만료</p>
           </div>
@@ -110,7 +104,12 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
         </div>
       </header>
 
-      <IssueBoard issues={boardIssues} token={session.token} />
+      <IssueBoard
+        token={session.token}
+        counts={counts}
+        initialItems={boardIssues}
+        initialCursor={issuePage.nextCursor}
+      />
 
       <MadeByBadge />
     </div>

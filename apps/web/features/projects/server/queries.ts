@@ -1,10 +1,40 @@
 import { prisma } from "@/lib/db";
-import type { Issue, IssueStatus, Project, QaSession, Release } from "@/lib/types";
+import { ISSUE_STATUSES, type Issue, type IssueStatus, type Project, type QaSession, type Release } from "@/lib/types";
 
 export interface IssueFilter {
   status?: IssueStatus;
   sessionId?: string;
   q?: string;
+}
+
+/** 한 번에 불러오는 이슈 수 (무한 스크롤 페이지 크기) */
+export const ISSUE_PAGE_SIZE = 10;
+
+export interface IssuePage {
+  issues: Issue[];
+  /** 다음 페이지 커서(마지막 이슈 id). 더 없으면 null */
+  nextCursor: number | null;
+}
+
+function issueWhere(releaseId: string, filter: IssueFilter) {
+  return {
+    releaseId,
+    sessionId: filter.sessionId,
+    status: filter.status,
+    ...(filter.q
+      ? {
+          OR: [
+            { memo: { contains: filter.q, mode: "insensitive" as const } },
+            { pageUrl: { contains: filter.q, mode: "insensitive" as const } },
+            { selector: { contains: filter.q, mode: "insensitive" as const } },
+            { errorName: { contains: filter.q, mode: "insensitive" as const } },
+            { errorCode: { contains: filter.q, mode: "insensitive" as const } },
+            { errorMessage: { contains: filter.q, mode: "insensitive" as const } },
+            { apiUrl: { contains: filter.q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
 }
 
 const iso = (value: Date) => value.toISOString();
@@ -188,6 +218,15 @@ export async function getRelease(id: string): Promise<Release | null> {
   return row ? mapRelease(row) : null;
 }
 
+/** 릴리즈가 해당 조직 소속인지 검증 (SDK 외 서버 액션 인가용) */
+export async function releaseBelongsToOrg(releaseId: string, orgId: string): Promise<boolean> {
+  const row = await prisma.release.findFirst({
+    where: { id: releaseId, project: { orgId } },
+    select: { id: true },
+  });
+  return row !== null;
+}
+
 export async function listSessions(releaseId: string): Promise<QaSession[]> {
   const rows = await prisma.qaSession.findMany({
     where: { releaseId },
@@ -203,25 +242,43 @@ export async function getSessionByToken(token: string): Promise<QaSession | null
 
 export async function listIssues(releaseId: string, filter: IssueFilter): Promise<Issue[]> {
   const rows = await prisma.issue.findMany({
-    where: {
-      releaseId,
-      sessionId: filter.sessionId,
-      status: filter.status,
-      ...(filter.q
-        ? {
-            OR: [
-              { memo: { contains: filter.q, mode: "insensitive" } },
-              { pageUrl: { contains: filter.q, mode: "insensitive" } },
-              { selector: { contains: filter.q, mode: "insensitive" } },
-              { errorName: { contains: filter.q, mode: "insensitive" } },
-              { errorCode: { contains: filter.q, mode: "insensitive" } },
-              { errorMessage: { contains: filter.q, mode: "insensitive" } },
-              { apiUrl: { contains: filter.q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
+    where: issueWhere(releaseId, filter),
+    orderBy: { id: "desc" },
   });
   return rows.map(mapIssue);
+}
+
+/** 커서 기반 한 페이지. id 내림차순(생성 역순)이라 id가 안정적인 커서가 된다. */
+export async function listIssuesPage(
+  releaseId: string,
+  filter: IssueFilter,
+  cursor?: number | null,
+): Promise<IssuePage> {
+  const rows = await prisma.issue.findMany({
+    where: issueWhere(releaseId, filter),
+    orderBy: { id: "desc" },
+    take: ISSUE_PAGE_SIZE + 1,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+  const hasMore = rows.length > ISSUE_PAGE_SIZE;
+  const page = hasMore ? rows.slice(0, ISSUE_PAGE_SIZE) : rows;
+  return {
+    issues: page.map(mapIssue),
+    nextCursor: hasMore ? page[page.length - 1].id : null,
+  };
+}
+
+/** 상태별 이슈 수. 페이지네이션과 무관하게 전체를 집계한다 (탭 배지용). */
+export async function countIssuesByStatus(
+  releaseId: string,
+  filter: Pick<IssueFilter, "sessionId" | "q">,
+): Promise<Record<IssueStatus, number>> {
+  const grouped = await prisma.issue.groupBy({
+    by: ["status"],
+    where: issueWhere(releaseId, filter),
+    _count: { _all: true },
+  });
+  const counts = Object.fromEntries(ISSUE_STATUSES.map((s) => [s, 0])) as Record<IssueStatus, number>;
+  for (const row of grouped) counts[row.status] = row._count._all;
+  return counts;
 }
