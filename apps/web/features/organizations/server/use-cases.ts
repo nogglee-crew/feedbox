@@ -8,7 +8,7 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
-export async function createOrganizationForCurrentUser(name: string): Promise<never> {
+export async function createOrganizationForCurrentUser(name: string): Promise<void> {
   const user = await getUser();
   if (!user?.email) redirect("/login");
 
@@ -32,10 +32,9 @@ export async function createOrganizationForCurrentUser(name: string): Promise<ne
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });
-  redirect("/projects");
 }
 
-export async function activateOrganizationForCurrentUser(orgId: string): Promise<never | void> {
+export async function activateOrganizationForCurrentUser(orgId: string): Promise<void> {
   const user = await getUser();
   if (!user?.email) redirect("/login");
 
@@ -57,7 +56,6 @@ export async function activateOrganizationForCurrentUser(orgId: string): Promise
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });
-  redirect("/projects");
 }
 
 export async function renameOrganization(input: { orgId: string; name: string }): Promise<void> {

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
   activateOrganizationForCurrentUser,
   addOrganizationMember,
@@ -8,17 +9,22 @@ import {
   removeOrganizationMember,
   renameOrganization,
 } from "@/features/organizations/server/use-cases";
+import { setFlashToast } from "@/lib/flash-toast";
 
 export async function createOrganization(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
   await createOrganizationForCurrentUser(name);
+  await setFlashToast("팀을 생성했습니다");
+  redirect("/projects");
 }
 
 export async function setActiveOrg(formData: FormData) {
   const orgId = String(formData.get("org_id") ?? "");
   if (!orgId) return;
   await activateOrganizationForCurrentUser(orgId);
+  await setFlashToast("팀을 전환했습니다");
+  redirect("/projects");
 }
 
 export async function renameOrg(formData: FormData) {
@@ -26,6 +32,7 @@ export async function renameOrg(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!orgId || !name) return;
   await renameOrganization({ orgId, name });
+  await setFlashToast("팀 이름을 저장했습니다");
   revalidatePath("/settings/teams");
   revalidatePath("/projects");
 }
@@ -36,6 +43,7 @@ export async function addOrgMember(formData: FormData) {
   const role = String(formData.get("role") ?? "member") === "owner" ? "owner" : "member";
   if (!orgId || !email || !email.includes("@")) return;
   await addOrganizationMember({ orgId, email, role });
+  await setFlashToast("멤버를 추가했습니다");
   revalidatePath("/settings/members");
 }
 
@@ -44,5 +52,6 @@ export async function removeOrgMember(formData: FormData) {
   const memberId = String(formData.get("member_id") ?? "");
   if (!orgId || !memberId) return;
   await removeOrganizationMember({ orgId, memberId });
+  await setFlashToast("멤버를 삭제했습니다");
   revalidatePath("/settings/members");
 }

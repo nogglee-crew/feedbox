@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requestSubscriptionInterest } from "@/features/billing/server/subscription-interest";
 import { getUser } from "@/lib/auth";
+import { setFlashToast } from "@/lib/flash-toast";
 import { requireOrg } from "@/lib/orgs";
 
 export async function requestSubscriptionNotify(formData: FormData) {
@@ -20,5 +21,6 @@ export async function requestSubscriptionNotify(formData: FormData) {
     email,
     orgId,
   });
+  await setFlashToast("출시 알림 신청이 완료되었습니다");
   revalidatePath("/projects");
 }
