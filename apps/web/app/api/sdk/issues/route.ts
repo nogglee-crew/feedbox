@@ -15,6 +15,60 @@ export async function OPTIONS() {
 // Leaves headroom under Vercel's 4.5 MB request limit.
 const MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024;
 
+function limitedText(value: unknown, maxLength: number): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, maxLength) : null;
+}
+
+function safeApiUrl(value: unknown): string | null {
+  const raw = limitedText(value, 2000);
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    url.hash = "";
+    return url.href.slice(0, 2000);
+  } catch {
+    return null;
+  }
+}
+
+function parseDiagnostics(value: unknown) {
+  if (typeof value !== "object" || value === null) return null;
+  const diagnostics = value as Record<string, unknown>;
+  const error =
+    typeof diagnostics.error === "object" && diagnostics.error !== null
+      ? (diagnostics.error as Record<string, unknown>)
+      : null;
+  const request =
+    typeof diagnostics.request === "object" && diagnostics.request !== null
+      ? (diagnostics.request as Record<string, unknown>)
+      : null;
+
+  const errorName = limitedText(error?.name, 120);
+  const errorCode = limitedText(error?.code, 120);
+  const errorMessage = limitedText(error?.message, 2000);
+  if (!errorName || !errorCode || !errorMessage) return null;
+
+  const status = request?.status;
+  return {
+    errorName,
+    errorCode,
+    errorMessage,
+    errorStack: limitedText(error?.stack, 10_000),
+    apiMethod: limitedText(request?.method, 16)?.toUpperCase() ?? null,
+    apiUrl: safeApiUrl(request?.url),
+    apiStatus:
+      typeof status === "number" && Number.isInteger(status) && status >= 0 && status <= 599
+        ? status
+        : null,
+  };
+}
+
 function decodeScreenshot(
   dataUrl: unknown,
 ): { buffer: Buffer; contentType: "image/png" | "image/jpeg" } | null {
@@ -46,6 +100,7 @@ export async function POST(request: Request) {
   const screenshotUrl = screenshot
     ? await saveScreenshot(project.id, screenshot.buffer, screenshot.contentType)
     : null;
+  const diagnostics = parseDiagnostics(body.diagnostics);
 
   try {
     const { id } = await createSdkIssue({
@@ -58,6 +113,13 @@ export async function POST(request: Request) {
       viewport_width: Number.isFinite(body.viewportWidth) ? body.viewportWidth : null,
       viewport_height: Number.isFinite(body.viewportHeight) ? body.viewportHeight : null,
       browser: typeof body.browser === "string" ? body.browser.slice(0, 500) : null,
+      error_name: diagnostics?.errorName ?? null,
+      error_code: diagnostics?.errorCode ?? null,
+      error_message: diagnostics?.errorMessage ?? null,
+      error_stack: diagnostics?.errorStack ?? null,
+      api_method: diagnostics?.apiMethod ?? null,
+      api_url: diagnostics?.apiUrl ?? null,
+      api_status: diagnostics?.apiStatus ?? null,
       memo: memo.trim().slice(0, 5000),
       screenshot_url: screenshotUrl,
     });

@@ -6,7 +6,7 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
-  const { context, error } = await authenticateSdk(body);
+  const { context, error } = await authenticateSdk(body, { requireOpenRelease: false });
   if (error) return error;
   const { project, session, release } = context!;
 
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     projectName: project.name,
     releaseId: release.id,
     releaseVersion: release.version,
+    releaseStatus: release.status,
     expiresAt: session.expires_at,
   });
 }

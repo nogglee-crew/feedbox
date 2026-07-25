@@ -77,6 +77,13 @@ function mapIssue(row: {
   viewportWidth: number | null;
   viewportHeight: number | null;
   browser: string | null;
+  errorName: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  errorStack: string | null;
+  apiMethod: string | null;
+  apiUrl: string | null;
+  apiStatus: number | null;
   memo: string;
   screenshotUrl: string | null;
   status: IssueStatus;
@@ -94,6 +101,13 @@ function mapIssue(row: {
     viewport_width: row.viewportWidth,
     viewport_height: row.viewportHeight,
     browser: row.browser,
+    error_name: row.errorName,
+    error_code: row.errorCode,
+    error_message: row.errorMessage,
+    error_stack: row.errorStack,
+    api_method: row.apiMethod,
+    api_url: row.apiUrl,
+    api_status: row.apiStatus,
     memo: row.memo,
     screenshot_url: row.screenshotUrl,
     status: row.status,
@@ -152,6 +166,10 @@ export async function listIssues(releaseId: string, filter: IssueFilter): Promis
               { memo: { contains: filter.q, mode: "insensitive" } },
               { pageUrl: { contains: filter.q, mode: "insensitive" } },
               { selector: { contains: filter.q, mode: "insensitive" } },
+              { errorName: { contains: filter.q, mode: "insensitive" } },
+              { errorCode: { contains: filter.q, mode: "insensitive" } },
+              { errorMessage: { contains: filter.q, mode: "insensitive" } },
+              { apiUrl: { contains: filter.q, mode: "insensitive" } },
             ],
           }
         : {}),

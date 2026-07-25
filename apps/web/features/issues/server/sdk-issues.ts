@@ -12,6 +12,13 @@ export interface NewSdkIssue {
   viewport_width: number | null;
   viewport_height: number | null;
   browser: string | null;
+  error_name: string | null;
+  error_code: string | null;
+  error_message: string | null;
+  error_stack: string | null;
+  api_method: string | null;
+  api_url: string | null;
+  api_status: number | null;
   memo: string;
   screenshot_url: string | null;
 }
@@ -40,6 +47,13 @@ export async function createSdkIssue(input: NewSdkIssue): Promise<{ id: number }
       viewportWidth: input.viewport_width,
       viewportHeight: input.viewport_height,
       browser: input.browser,
+      errorName: input.error_name,
+      errorCode: input.error_code,
+      errorMessage: input.error_message,
+      errorStack: input.error_stack,
+      apiMethod: input.api_method,
+      apiUrl: input.api_url,
+      apiStatus: input.api_status,
       memo: input.memo,
       screenshotUrl: input.screenshot_url,
     },

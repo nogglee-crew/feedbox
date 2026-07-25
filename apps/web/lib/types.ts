@@ -66,6 +66,13 @@ export interface Issue {
   viewport_width: number | null;
   viewport_height: number | null;
   browser: string | null;
+  error_name: string | null;
+  error_code: string | null;
+  error_message: string | null;
+  error_stack: string | null;
+  api_method: string | null;
+  api_url: string | null;
+  api_status: number | null;
   memo: string;
   screenshot_url: string | null;
   status: IssueStatus;

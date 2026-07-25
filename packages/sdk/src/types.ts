@@ -11,7 +11,31 @@ export interface FeedboxSessionInfo {
   projectName: string;
   releaseId: string;
   releaseVersion: string;
+  releaseStatus: "OPEN" | "CLOSED";
   expiresAt: string;
+}
+
+export interface IssueErrorContext {
+  name: string;
+  code: string;
+  message: string;
+  stack: string | null;
+}
+
+export interface IssueRequestContext {
+  method: string;
+  url: string;
+  status: number | null;
+}
+
+export interface IssueDiagnostics {
+  error: IssueErrorContext;
+  request: IssueRequestContext | null;
+}
+
+export interface CaptureFeedboxErrorOptions {
+  code?: string;
+  request?: IssueRequestContext | null;
 }
 
 export interface IssuePayload {
@@ -23,6 +47,7 @@ export interface IssuePayload {
   browser: string;
   memo: string;
   screenshot: string | null;
+  diagnostics?: IssueDiagnostics | null;
 }
 
 export interface CreatedIssue {

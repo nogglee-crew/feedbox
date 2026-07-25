@@ -4,13 +4,14 @@ import type {
   FeedboxSessionInfo,
   IssuePayload,
 } from "./types";
+import { untrackedFetch } from "./diagnostics";
 
 function baseUrl(config: FeedboxConfig): string {
   return (config.apiBaseUrl ?? "").replace(/\/$/, "");
 }
 
 async function post<T>(config: FeedboxConfig, path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${baseUrl(config)}${path}`, {
+  const res = await untrackedFetch(`${baseUrl(config)}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

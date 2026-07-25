@@ -100,6 +100,7 @@ Organization
 - API: `/api/sdk/sessions/verify`, `/api/sdk/issues`
 
 The fragment keeps the token out of the initial HTTP request. The project API key is public client configuration; the session token is the capability. Keep Prisma models separate from public SDK response types.
+The SDK attaches recent runtime errors and failed request metadata to issues, excluding query strings, headers, and bodies.
 
 ## Decisions
 

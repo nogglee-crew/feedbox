@@ -22,11 +22,16 @@ export interface SdkContext {
   release: Release;
 }
 
+interface AuthenticateSdkOptions {
+  requireOpenRelease?: boolean;
+}
+
 export async function authenticateSdk(body: {
   projectKey?: string;
   apiKey?: string;
   token?: string;
-}): Promise<{ context?: SdkContext; error?: NextResponse }> {
+}, options: AuthenticateSdkOptions = {}): Promise<{ context?: SdkContext; error?: NextResponse }> {
+  const requireOpenRelease = options.requireOpenRelease ?? true;
   const { projectKey, apiKey, token } = body;
   if (!projectKey || !apiKey || !token) {
     return { error: corsJson({ error: "projectKey, apiKey, token이 필요합니다" }, 400) };
@@ -55,7 +60,7 @@ export async function authenticateSdk(body: {
     return { error: corsJson({ error: "만료된 QA 세션입니다" }, 401) };
   }
 
-  if (row.release.status !== "OPEN") {
+  if (requireOpenRelease && row.release.status !== "OPEN") {
     return { error: corsJson({ error: "종료된 릴리즈입니다" }, 401) };
   }
 

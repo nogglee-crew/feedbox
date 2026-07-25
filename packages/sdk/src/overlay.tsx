@@ -2,9 +2,14 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createIssue } from "./api";
+import { getRecentDiagnostics } from "./diagnostics";
 import { captureScreenshot } from "./screenshot";
 import { buildSelector, elementText } from "./selector";
-import type { FeedboxConfig, FeedboxSessionInfo } from "./types";
+import type {
+  FeedboxConfig,
+  FeedboxSessionInfo,
+  IssueDiagnostics,
+} from "./types";
 
 type Mode = "idle" | "picking" | "editing";
 
@@ -19,6 +24,7 @@ interface Target {
   selector: string;
   text: string | null;
   rect: Rect;
+  diagnostics: IssueDiagnostics | null;
 }
 
 const Z = 2147483000;
@@ -39,6 +45,21 @@ const styles = {
     boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontSize: 13,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    flex: "0 0 auto",
+  },
+  statusDotOpen: {
+    background: "#22c55e",
+    boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.55)",
+    animation: "feedbox-status-pulse 1.35s ease-out infinite",
+  },
+  statusDotClosed: {
+    background: "#6b7280",
+    boxShadow: "none",
   },
   button: {
     border: "none",
@@ -129,14 +150,84 @@ const styles = {
     boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
+  entryNotice: {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    zIndex: Z + 6,
+    transform: "translate(-50%, -50%)",
+    width: 380,
+    maxWidth: "calc(100vw - 40px)",
+    padding: "24px 26px",
+    borderRadius: 16,
+    background: "#111827",
+    color: "#f9fafb",
+    boxShadow: "0 18px 60px rgba(0,0,0,0.4)",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    textAlign: "center",
+    pointerEvents: "none",
+  },
+  entryScrim: {
+    position: "fixed",
+    inset: 0,
+    zIndex: Z + 5,
+    background: "rgba(17, 24, 39, 0.38)",
+    pointerEvents: "none",
+  },
+  entryNoticeTitle: {
+    fontSize: 22,
+    fontWeight: 800,
+    lineHeight: 1.35,
+  },
+  entryNoticeDescription: {
+    marginTop: 8,
+    fontSize: 15,
+    lineHeight: 1.5,
+    color: "#d1d5db",
+  },
 } satisfies Record<string, React.CSSProperties>;
+
+export function FeedboxLoadingToolbar() {
+  return createPortal(
+    <div
+      data-feedbox="toolbar"
+      aria-busy="true"
+      aria-label="피드백 세션 확인 중"
+      style={styles.toolbar as React.CSSProperties}
+    >
+      <span
+        data-feedbox="status-dot"
+        style={{
+          ...styles.statusDot,
+          ...styles.statusDotClosed,
+        } as React.CSSProperties}
+      />
+      <span style={{ fontWeight: 700 }}>피드백 모드</span>
+      <span style={{ color: "#9ca3af" }}>세션 확인 중...</span>
+      <button
+        type="button"
+        disabled
+        style={{
+          ...(styles.button as React.CSSProperties),
+          opacity: 0.5,
+          cursor: "not-allowed",
+        }}
+      >
+        요소 선택
+      </button>
+    </div>,
+    document.body,
+  );
+}
 
 export function FeedboxOverlay({
   config,
   session,
+  entryNoticeKey = 0,
 }: {
   config: FeedboxConfig;
   session: FeedboxSessionInfo;
+  entryNoticeKey?: number;
 }) {
   const [mode, setMode] = useState<Mode>("idle");
   const [hoverRect, setHoverRect] = useState<Rect | null>(null);
@@ -145,14 +236,27 @@ export function FeedboxOverlay({
   const [withScreenshot, setWithScreenshot] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [showEntryNotice, setShowEntryNotice] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFeedbackOpen = session.releaseStatus === "OPEN";
 
   const showToast = useCallback((message: string) => {
     setToast(message);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
+
+  useEffect(() => {
+    if (!entryNoticeKey) return;
+    setShowEntryNotice(true);
+  }, [entryNoticeKey]);
+
+  useEffect(() => {
+    if (!showEntryNotice) return;
+    const timer = window.setTimeout(() => setShowEntryNotice(false), 3000);
+    return () => window.clearTimeout(timer);
+  }, [showEntryNotice]);
 
   // Capture phase prevents the host page from handling selection clicks.
   useEffect(() => {
@@ -181,6 +285,7 @@ export function FeedboxOverlay({
         selector: buildSelector(el),
         text: elementText(el),
         rect: { top: r.top, left: r.left, width: r.width, height: r.height },
+        diagnostics: getRecentDiagnostics(),
       });
       setMode("editing");
     };
@@ -226,6 +331,7 @@ export function FeedboxOverlay({
         browser: navigator.userAgent,
         memo: memo.trim(),
         screenshot,
+        diagnostics: target.diagnostics,
       });
       reset();
       showToast(`이슈 #${issue.id} 등록 완료`);
@@ -240,6 +346,18 @@ export function FeedboxOverlay({
 
   return createPortal(
     <div data-feedbox="root">
+      {showEntryNotice && (
+        <>
+          <div data-feedbox="entry-scrim" style={styles.entryScrim as React.CSSProperties} />
+          <div data-feedbox="entry-notice" style={styles.entryNotice as React.CSSProperties}>
+            <div style={styles.entryNoticeTitle}>피드백 모드에 진입했습니다.</div>
+            <div style={styles.entryNoticeDescription}>
+              화면에서 문제가 있는 요소를 선택해 피드백을 남길 수 있습니다.
+            </div>
+          </div>
+        </>
+      )}
+
       {activeRect && (
         <div
           data-feedbox="highlight"
@@ -255,7 +373,7 @@ export function FeedboxOverlay({
 
       {mode === "editing" && target && (
         <div data-feedbox="panel" style={styles.panel}>
-          <div style={styles.panelHeader}>QA 이슈 등록 · {session.releaseVersion}</div>
+          <div style={styles.panelHeader}>피드백 등록 · {session.releaseVersion}</div>
           <div style={styles.panelBody as React.CSSProperties}>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>선택한 요소</div>
@@ -264,6 +382,25 @@ export function FeedboxOverlay({
                 <div style={{ marginTop: 4, color: "#6b7280", fontSize: 12 }}>“{target.text}”</div>
               )}
             </div>
+            {target.diagnostics && (
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>최근 감지된 에러</div>
+                <code style={styles.code}>
+                  {target.diagnostics.error.name} · {target.diagnostics.error.code}
+                </code>
+                <div style={{ marginTop: 4, color: "#6b7280", fontSize: 12 }}>
+                  {target.diagnostics.error.message}
+                </div>
+                {target.diagnostics.request && (
+                  <div style={{ marginTop: 4, color: "#6b7280", fontSize: 12 }}>
+                    {target.diagnostics.request.method} {target.diagnostics.request.url}
+                    {target.diagnostics.request.status
+                      ? ` · ${target.diagnostics.request.status}`
+                      : ""}
+                  </div>
+                )}
+              </div>
+            )}
             <textarea
               style={styles.textarea as React.CSSProperties}
               placeholder="어떤 문제가 있나요? (예: 버튼을 눌러도 반응이 없어요)"
@@ -301,8 +438,30 @@ export function FeedboxOverlay({
       )}
 
       <div data-feedbox="toolbar" style={styles.toolbar as React.CSSProperties}>
-        <span style={{ fontWeight: 700 }}>QA</span>
-        <span style={{ color: "#9ca3af" }}>{session.projectName} · {session.releaseVersion}</span>
+        <style>
+          {`
+            @keyframes feedbox-status-pulse {
+              0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+              70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+              100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              [data-feedbox="status-dot"] { animation: none !important; }
+            }
+          `}
+        </style>
+        <span
+          data-feedbox="status-dot"
+          title={isFeedbackOpen ? "피드백 모드 열림" : "피드백 모드 닫힘"}
+          style={{
+            ...styles.statusDot,
+            ...(isFeedbackOpen ? styles.statusDotOpen : styles.statusDotClosed),
+          } as React.CSSProperties}
+        />
+        <span style={{ fontWeight: 700 }}>피드백 모드</span>
+        <span style={{ color: "#9ca3af" }}>
+          {session.projectName} · {session.releaseVersion}
+        </span>
         <a
           data-feedbox="board-link"
           href={`${(config.apiBaseUrl ?? "").replace(/\/$/, "")}/board/${session.token}`}
@@ -326,8 +485,14 @@ export function FeedboxOverlay({
         ) : (
           <button
             type="button"
-            style={styles.button as React.CSSProperties}
+            style={{
+              ...(styles.button as React.CSSProperties),
+              opacity: isFeedbackOpen ? 1 : 0.5,
+              cursor: isFeedbackOpen ? "pointer" : "not-allowed",
+            }}
+            disabled={!isFeedbackOpen}
             onClick={() => {
+              if (!isFeedbackOpen) return;
               reset();
               setMode("picking");
             }}

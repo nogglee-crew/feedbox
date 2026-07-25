@@ -142,6 +142,13 @@ model Issue {
   viewportWidth  Int?        @map("viewport_width")
   viewportHeight Int?        @map("viewport_height")
   browser        String?
+  errorName      String?     @map("error_name")
+  errorCode      String?     @map("error_code")
+  errorMessage   String?     @map("error_message")
+  errorStack     String?     @map("error_stack")
+  apiMethod      String?     @map("api_method")
+  apiUrl         String?     @map("api_url")
+  apiStatus      Int?        @map("api_status")
   memo           String
   screenshotUrl  String?     @map("screenshot_url")
   status         IssueStatus @default(OPEN)
