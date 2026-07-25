@@ -4,7 +4,9 @@ React SDK for collecting FEEDBOX feedback directly from a web page. Testers poin
 element that broke and write a note; the SDK attaches the selector, recent errors, failed
 API calls, viewport, browser, and a screenshot.
 
-Product: <https://feedbox.nogglee.com>
+Product: <https://feedbox.nogglee.com> ·
+[Live demo](https://feedbox.nogglee.com/demo#session=Z72AGKeihOspaMRN3NoNqi8iaVfhtajh)
+(the toolbar appears at the bottom right — the link already carries a QA session)
 
 ## Install
 

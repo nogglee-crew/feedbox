@@ -3,7 +3,7 @@
 버그 제보를 받는 가장 짧은 경로. 사용자가 화면에서 문제가 된 요소를 찍고 메모만 남기면
 셀렉터, 에러, 실패한 API 호출, 브라우저 환경, 스크린샷이 자동으로 첨부됩니다.
 
-**<https://feedbox.nogglee.com>** · [데모 체험](https://feedbox.nogglee.com/demo) ·
+**<https://feedbox.nogglee.com>** · [데모 체험](https://feedbox.nogglee.com/demo#session=Z72AGKeihOspaMRN3NoNqi8iaVfhtajh) ·
 [@nogglee/feedbox](https://www.npmjs.com/package/@nogglee/feedbox)
 
 이 저장소는 FEEDBOX 플랫폼(Next.js 애플리케이션)과 React SDK를 함께 담고 있습니다.
@@ -94,5 +94,5 @@ SDK 전체 레퍼런스와 문제 해결은 [`packages/sdk/README.md`](packages/
 FEEDBOX 플랫폼 소스는 [GNU AGPL v3](LICENSE)를 따릅니다. 자유롭게 사용·수정·배포할 수
 있으며, 수정한 버전을 네트워크 서비스로 제공할 경우 그 사용자에게 소스를 제공해야 합니다.
 
-`packages/sdk`의 `@nogglee/feedbox` SDK는 **별도의 [MIT License](packages/sdk/LICENSE)**를
+`packages/sdk`의 `@nogglee/feedbox` SDK는 별도의 [MIT License](packages/sdk/LICENSE)를
 적용합니다. 고객 애플리케이션에 설치되는 코드이므로 AGPL이 전파되지 않습니다.
