@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createOrganization } from "@/app/org-actions";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { CopyText } from "@/components/ui/copy-text";
 import { Input } from "@/components/ui/input";
 import { getUser, isAuthEnabled } from "@/lib/auth";
@@ -27,9 +27,9 @@ export default async function OnboardingPage() {
         </div>
         <form action={createOrganization} className="space-y-3">
           <Input name="name" required aria-label="팀 이름" placeholder="예: 노글리 팀" className="w-full" />
-          <Button type="submit" variant="primary" className="w-full">
+          <SubmitButton className="w-full" pendingText="생성 중...">
             팀 생성
-          </Button>
+          </SubmitButton>
         </form>
         <p className="text-xs text-subtle">
           이미 팀이 있다면 owner에게 <CopyText value={user.email} className="text-xs" /> 초대를

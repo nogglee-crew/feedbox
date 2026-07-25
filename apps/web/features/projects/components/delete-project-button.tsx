@@ -5,6 +5,7 @@ import { deleteProject } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function DeleteProjectButton({
   orgSlug,
@@ -59,9 +60,9 @@ export function DeleteProjectButton({
           />
           <div className="flex justify-end gap-2">
             <Button onClick={close}>취소</Button>
-            <Button type="submit" variant="dangerSolid" disabled={!matched}>
+            <SubmitButton variant="dangerSolid" disabled={!matched} pendingText="삭제 중...">
               삭제하기
-            </Button>
+            </SubmitButton>
           </div>
         </form>
       </Modal>

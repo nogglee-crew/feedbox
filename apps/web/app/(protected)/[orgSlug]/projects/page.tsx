@@ -4,10 +4,10 @@ import { createProject } from "@/app/actions";
 import { SubscribeUpsell } from "@/features/billing/components/subscribe-upsell";
 import { TeamSwitcher } from "@/features/organizations/components/team-switcher";
 import { StatusBadge, Tag } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   hasPaidAccess,
   projectLimit,
@@ -71,7 +71,7 @@ export default async function ProjectsPage({
             label="프로젝트 이름"
             name="name"
             required
-            placeholder="예: ATOZ ERP"
+            placeholder="커머스 어드민"
           />
           <Input
             label="서비스 URL (QA 링크 생성용, 선택)"
@@ -79,9 +79,7 @@ export default async function ProjectsPage({
             placeholder="https://staging.company.com"
             className="w-72"
           />
-          <Button type="submit" variant="primary">
-            프로젝트 생성
-          </Button>
+          <SubmitButton pendingText="생성 중...">프로젝트 생성</SubmitButton>
         </form>
       )}
 

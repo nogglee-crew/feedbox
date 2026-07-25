@@ -1,9 +1,9 @@
 import { requestSubscriptionNotify } from "@/app/subscribe-actions";
 import { Dot } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function SubscribeUpsell({
   email,
@@ -42,9 +42,7 @@ export function SubscribeUpsell({
               aria-label="알림 받을 이메일"
               className="w-72"
             />
-            <Button type="submit" variant="primary">
-              출시 알림 받기
-            </Button>
+            <SubmitButton pendingText="신청 중...">출시 알림 받기</SubmitButton>
           </div>
           <Checkbox
             name="privacy_agree"

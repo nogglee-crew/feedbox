@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { HiChevronDown } from "react-icons/hi2";
-import Link from "next/link";
+import { HiChevronDown, HiOutlineArrowPath } from "react-icons/hi2";
+import Link, { useLinkStatus } from "next/link";
 import { PlanBadge } from "@/features/billing/components/plan-badge";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { CreateTeamModal } from "@/features/organizations/components/create-team";
 import { Menu, menuItemClasses } from "@/components/ui/menu";
+
+/** 클릭한 팀으로 이동하는 동안 스피너를 띄워 즉각적인 피드백을 준다 */
+function TeamNavPending() {
+  const { pending } = useLinkStatus();
+  return pending ? (
+    <HiOutlineArrowPath aria-hidden className="size-4 animate-spin text-subtle" />
+  ) : null;
+}
 
 export interface TeamOption {
   id: string;
@@ -41,12 +49,17 @@ export function TeamSwitcher({ teams, activeId }: { teams: TeamOption[]; activeI
         {(close) => (
           <>
             {others.map((team) => (
-              <Link key={team.id} href={`/${team.slug}/projects`} className={menuItemClasses()}>
-                  <span className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">{team.name}</span>
-                    <PlanBadge paid={team.paid} />
-                    <RoleBadge role={team.role} />
-                  </span>
+              <Link
+                key={team.id}
+                href={`/${team.slug}/projects`}
+                className={menuItemClasses("justify-between")}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">{team.name}</span>
+                  <PlanBadge paid={team.paid} />
+                  <RoleBadge role={team.role} />
+                </span>
+                <TeamNavPending />
               </Link>
             ))}
             {others.length === 0 && (

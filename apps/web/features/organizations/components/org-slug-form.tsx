@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { checkOrgSlug, updateOrgSlug } from "@/app/org-actions";
-import { Button } from "@/components/ui/button";
 import { describedBy, Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { normalizeOrgSlug } from "@/lib/org-slugs";
 
 const GUIDE = "영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.";
@@ -32,12 +32,13 @@ export function OrgSlugForm({ orgId, slug }: { orgId: string; slug: string }) {
     }
 
     setStatus("checking");
+    // 타이핑이 멈춘 뒤에만 서버에 물어보도록 디바운스를 넉넉히 둔다
     const timer = window.setTimeout(() => {
       void checkOrgSlug(orgId, normalized).then((result) => {
         setStatus(result.available ? "available" : "taken");
         setMessage(result.available ? "사용할 수 있습니다" : (result.error ?? "사용중인 주소입니다"));
       });
-    }, 100);
+    }, 400);
 
     return () => window.clearTimeout(timer);
   }, [changed, normalized, orgId]);
@@ -66,9 +67,13 @@ export function OrgSlugForm({ orgId, slug }: { orgId: string; slug: string }) {
             required
             className="w-64"
           />
-          <Button type="submit" disabled={!changed || status !== "available"}>
+          <SubmitButton
+            variant="secondary"
+            disabled={!changed || status !== "available"}
+            pendingText="저장 중..."
+          >
             저장
-          </Button>
+          </SubmitButton>
         </div>
       </Field>
     </form>

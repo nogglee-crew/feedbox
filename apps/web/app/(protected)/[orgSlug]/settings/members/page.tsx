@@ -1,10 +1,10 @@
 import { addOrgMember, removeOrgMember } from "@/app/org-actions";
 import { MemberAvatar } from "@/features/organizations/components/avatar-stack";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
-import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { listOrgMembers, requireOrgBySlug } from "@/lib/orgs";
 
 export const metadata = { title: "멤버 관리" };
@@ -54,9 +54,7 @@ export default async function MembersPage({
             <option value="member">member</option>
             <option value="owner">owner</option>
           </Select>
-          <Button type="submit" variant="primary">
-            멤버 추가
-          </Button>
+          <SubmitButton pendingText="추가 중...">멤버 추가</SubmitButton>
         </form>
       )}
 
@@ -113,9 +111,9 @@ export default async function MembersPage({
                           value={ctx.org.slug}
                         />
                         <input type="hidden" name="member_id" value={m.id} />
-                        <Button type="submit" size="sm" variant="danger">
+                        <SubmitButton size="sm" variant="danger" pendingText="삭제 중...">
                           삭제
-                        </Button>
+                        </SubmitButton>
                       </form>
                     )}
                   </td>

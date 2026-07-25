@@ -11,6 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Menu, menuItemClasses } from "@/components/ui/menu";
 import { Modal } from "@/components/ui/modal";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 interface ProfileTeam {
   name: string;
@@ -97,9 +98,9 @@ export function ProfileMenu({
           <>
             <Button onClick={() => setConfirmingDelete(false)}>취소</Button>
             <form action={deleteAccount}>
-              <Button type="submit" variant="dangerSolid">
+              <SubmitButton variant="dangerSolid" pendingText="탈퇴 처리 중...">
                 탈퇴하기
-              </Button>
+              </SubmitButton>
             </form>
           </>
         }

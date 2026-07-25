@@ -8,7 +8,7 @@ import {
 } from "@/app/actions";
 import { CopyButton } from "@/components/ui/copy-button";
 import { StatusBadge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card, cardClasses } from "@/components/ui/card";
 import { Code } from "@/components/ui/code";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -114,7 +114,9 @@ export default async function ProjectPage({
                 placeholder="https://staging.company.com"
                 className="min-w-0 flex-1"
               />
-              <Button type="submit">저장</Button>
+              <SubmitButton variant="secondary" pendingText="저장 중...">
+                저장
+              </SubmitButton>
             </form>
           </div>
         </Card>
@@ -134,9 +136,7 @@ export default async function ProjectPage({
             required
             placeholder="예: v1.0.5"
           />
-          <Button type="submit" variant="primary">
-            릴리즈 생성
-          </Button>
+          <SubmitButton pendingText="생성 중...">릴리즈 생성</SubmitButton>
         </form>
 
         <ul className={`${cardClasses("none")} divide-y divide-border`}>
@@ -163,9 +163,9 @@ export default async function ProjectPage({
                   name="status"
                   value={r.status === "OPEN" ? "CLOSED" : "OPEN"}
                 />
-                <Button type="submit" size="sm">
+                <SubmitButton variant="secondary" size="sm">
                   {r.status === "OPEN" ? "QA 종료" : "다시 열기"}
-                </Button>
+                </SubmitButton>
               </form>
             </li>
           ))}

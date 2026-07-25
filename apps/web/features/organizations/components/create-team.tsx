@@ -5,6 +5,7 @@ import { createOrganization } from "@/app/org-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function CreateTeamModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
@@ -21,9 +22,7 @@ export function CreateTeamModal({ open, onClose }: { open: boolean; onClose: () 
         />
         <div className="flex justify-end gap-2">
           <Button onClick={onClose}>취소</Button>
-          <Button type="submit" variant="primary">
-            팀 생성
-          </Button>
+          <SubmitButton pendingText="생성 중...">팀 생성</SubmitButton>
         </div>
       </form>
     </Modal>

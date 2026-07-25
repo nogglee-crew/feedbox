@@ -6,7 +6,8 @@ import { PlanBadge } from "@/features/billing/components/plan-badge";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { CreateTeamButton } from "@/features/organizations/components/create-team";
 import { DeleteTeamButton } from "@/features/organizations/components/delete-team-button";
-import { Button, buttonClasses } from "@/components/ui/button";
+import { buttonClasses } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { cardClasses } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
@@ -83,7 +84,9 @@ export default async function TeamsPage({
                       defaultValue={org.name}
                       className="w-64"
                     />
-                    <Button type="submit">저장</Button>
+                    <SubmitButton variant="secondary" pendingText="저장 중...">
+                      저장
+                    </SubmitButton>
                   </form>
                   <OrgSlugForm orgId={org.id} slug={org.slug} />
                 </>

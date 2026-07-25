@@ -5,6 +5,7 @@ import { createQaSession } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function CreateQaSessionButton({
   projectId,
@@ -56,9 +57,7 @@ export function CreateQaSessionButton({
           />
           <div className="flex justify-end gap-2">
             <Button onClick={() => setOpen(false)}>취소</Button>
-            <Button type="submit" variant="primary">
-              발급
-            </Button>
+            <SubmitButton pendingText="발급 중...">발급</SubmitButton>
           </div>
         </form>
       </Modal>
