@@ -15,6 +15,7 @@ import { Code } from "@/components/ui/code";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { DeleteProjectButton } from "@/features/projects/components/delete-project-button";
+import { buildInstallPrompt } from "@/lib/install-prompt";
 import { requireOrgBySlug } from "@/lib/orgs";
 import { getProject, listReleases } from "@/features/projects/server/queries";
 
@@ -88,6 +89,23 @@ export default async function ProjectPage({
                   {"•".repeat(12)}
                 </Code>
                 <CopyButton value={project.api_key} />
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-3 px-5 py-3">
+              <dt className="min-w-0 text-xs font-semibold text-muted">
+                에이전트 설치 프롬프트
+                <span className="mt-0.5 block font-normal text-subtle">
+                  키가 채워진 채로 복사돼, 코딩 에이전트에 붙여넣으면 설치가 끝납니다.
+                </span>
+              </dt>
+              <dd className="shrink-0">
+                <CopyButton
+                  value={buildInstallPrompt({
+                    projectKey: project.project_key,
+                    apiKey: project.api_key,
+                  })}
+                  label="프롬프트 복사"
+                />
               </dd>
             </div>
           </dl>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
+import { buildInstallPrompt } from "@/lib/install-prompt";
 import { StatusBadge, Tag } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
 import { Card, cardClasses } from "@/components/ui/card";
@@ -23,26 +24,7 @@ function SectionHeading({ title, sub }: { title: string; sub: string }) {
 /** 상시 공개 데모 세션. 토큰이 있어야 SDK 툴바가 뜬다 */
 const DEMO_URL = "/demo#session=Z72AGKeihOspaMRN3NoNqi8iaVfhtajh";
 
-/** 코딩 에이전트가 한 번에 설치를 끝내도록 설계한 프롬프트. 영문이 도구 호환성이 좋다 */
-const INSTALL_PROMPT = `Install FEEDBOX (@nogglee/feedbox), a React SDK that collects user feedback with automatic diagnostics, into this project.
-
-1. Install the package with this project's package manager
-   (npm i @nogglee/feedbox / pnpm add @nogglee/feedbox / yarn add @nogglee/feedbox).
-2. Find the app's root component and wrap it once with the provider:
-
-   import { FeedboxProvider } from "@nogglee/feedbox";
-
-   <FeedboxProvider projectKey={PROJECT_KEY} apiKey={API_KEY}>
-     <App />
-   </FeedboxProvider>
-
-3. Read both keys from public client env vars using this framework's convention
-   (e.g. NEXT_PUBLIC_FEEDBOX_PROJECT_KEY / VITE_FEEDBOX_PROJECT_KEY), and add
-   placeholder entries to the env example file. I will paste the real values
-   from the FEEDBOX dashboard (Project → SDK 설치 정보).
-4. Do not change any other behavior, styling, or dependencies.
-
-Docs: https://github.com/nogglee-crew/feedbox`;
+const INSTALL_PROMPT = buildInstallPrompt();
 
 const FEATURES = [
   {
