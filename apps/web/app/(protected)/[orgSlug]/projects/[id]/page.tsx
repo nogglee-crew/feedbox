@@ -77,7 +77,11 @@ export default async function ProjectPage({
               <dt className="text-xs font-semibold text-muted">projectKey</dt>
               <dd className="flex min-w-0 items-center gap-1.5">
                 <Code className="truncate">{project.project_key}</Code>
-                <CopyButton value={project.project_key} />
+                <CopyButton
+                  value={project.project_key}
+                  event="sdk_key_copy"
+                  eventParams={{ key_type: "project_key" }}
+                />
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
@@ -88,7 +92,11 @@ export default async function ProjectPage({
                   {project.api_key.slice(0, 3)}
                   {"•".repeat(12)}
                 </Code>
-                <CopyButton value={project.api_key} />
+                <CopyButton
+                  value={project.api_key}
+                  event="sdk_key_copy"
+                  eventParams={{ key_type: "api_key" }}
+                />
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3">
@@ -105,6 +113,8 @@ export default async function ProjectPage({
                     apiKey: project.api_key,
                   })}
                   label="프롬프트 복사"
+                  event="install_prompt_copy"
+                  eventParams={{ location: "project_detail" }}
                 />
               </dd>
             </div>

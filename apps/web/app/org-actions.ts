@@ -20,7 +20,7 @@ export async function createOrganization(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
   const org = await createOrganizationForCurrentUser(name);
-  await setFlashToast("팀을 생성했습니다");
+  await setFlashToast("팀을 생성했습니다", "success", "org_create");
   redirect(`/${org.slug}/projects`);
 }
 

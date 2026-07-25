@@ -15,6 +15,7 @@ import {
   HiExclamationCircle,
   HiInformationCircle,
 } from "react-icons/hi2";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "./cn";
 
 export type ToastTone = "success" | "danger" | "info";
@@ -23,9 +24,14 @@ export interface ToastMessage {
   id?: string;
   message: string;
   tone?: ToastTone;
+  /** 서버 액션 성공 시 1회 전송할 GA4 이벤트 이름 */
+  event?: string;
 }
 
-type ToastItem = Required<ToastMessage> & {
+/** event는 표시에 쓰이지 않고 initialToast에서 1회 전송하고 끝난다 */
+type ToastDisplay = Required<Omit<ToastMessage, "event">>;
+
+type ToastItem = ToastDisplay & {
   leaving: boolean;
 };
 
@@ -107,7 +113,7 @@ function createToastId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
 }
 
-function normalizeToast(toast: string | ToastMessage): Required<ToastMessage> {
+function normalizeToast(toast: string | ToastMessage): ToastDisplay {
   if (typeof toast === "string") {
     return { id: createToastId(), message: toast, tone: "info" };
   }
@@ -145,6 +151,7 @@ export function ToastProvider({
     if (!initialToast || displayedInitialToastId.current === initialToast.id) return;
     displayedInitialToastId.current = initialToast.id ?? null;
     showToast(initialToast);
+    if (initialToast.event) trackEvent(initialToast.event);
     void fetch("/api/flash-toast", { method: "DELETE" });
   }, [initialToast, showToast]);
 

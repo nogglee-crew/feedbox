@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { buildInstallPrompt } from "@/lib/install-prompt";
 import { StatusBadge, Tag } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { FeatureCard } from "@/features/landing/components/feature-card";
 import { HeroDemo } from "@/features/landing/components/hero-demo";
 import { Reveal } from "@/features/landing/components/reveal";
+import { TrackedLink } from "@/features/landing/components/tracked-link";
 
 function SectionHeading({ title, sub }: { title: string; sub: string }) {
   return (
@@ -128,12 +128,14 @@ export function LandingPage() {
             priority
             className="h-6 w-auto"
           />
-          <Link
+          <TrackedLink
             href="/auth/sign-in"
+            event="cta_signin_click"
+            eventParams={{ location: "header" }}
             className={buttonClasses("secondary", "sm")}
           >
             로그인
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 
@@ -157,12 +159,21 @@ export function LandingPage() {
               피드박스가 자동으로 수집해드릴게요.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <Link href="/auth/sign-in" className={buttonClasses("primary")}>
+              <TrackedLink
+                href="/auth/sign-in"
+                event="cta_signin_click"
+                eventParams={{ location: "hero" }}
+                className={buttonClasses("primary")}
+              >
                 구글 계정으로 시작하기
-              </Link>
-              <Link href={DEMO_URL} className={buttonClasses("secondary")}>
+              </TrackedLink>
+              <TrackedLink
+                href={DEMO_URL}
+                event="demo_click"
+                className={buttonClasses("secondary")}
+              >
                 데모 체험하기
-              </Link>
+              </TrackedLink>
             </div>
           </div>
 
@@ -259,16 +270,18 @@ export function LandingPage() {
                     value={INSTALL_PROMPT}
                     label="프롬프트 복사"
                     variant="secondary"
+                    event="install_prompt_copy"
+                    eventParams={{ location: "landing" }}
                   />
-                  <a
+                  <TrackedLink
                     href="https://github.com/nogglee-crew/feedbox"
-                    target="_blank"
-                    rel="noreferrer"
+                    event="github_click"
+                    external
                     className={buttonClasses("ghost", "sm")}
                   >
                     <HiArrowTopRightOnSquare aria-hidden className="size-3.5" />
                     GitHub
-                  </a>
+                  </TrackedLink>
                 </span>
               </div>
               <pre className="max-h-72 overflow-auto whitespace-pre-wrap p-5 font-mono text-xs leading-relaxed text-muted">
@@ -379,12 +392,14 @@ export function LandingPage() {
                 프롬프트 한 장 붙여넣으면 설치는 끝
               </p>
               <div className="relative mt-6 flex justify-center">
-                <Link
+                <TrackedLink
                   href="/auth/sign-in"
+                  event="cta_signin_click"
+                  eventParams={{ location: "footer" }}
                   className="inline-flex items-center justify-center rounded-md bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
                 >
                   구글 계정으로 시작하기
-                </Link>
+                </TrackedLink>
               </div>
             </div>
           </Reveal>

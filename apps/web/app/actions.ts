@@ -20,7 +20,7 @@ export async function createProject(formData: FormData) {
   if (!orgSlug || !name) return;
   const baseUrl = String(formData.get("base_url") ?? "").trim() || null;
   await createProjectForCurrentOrg({ orgSlug, name, baseUrl });
-  await setFlashToast("프로젝트를 생성했습니다");
+  await setFlashToast("프로젝트를 생성했습니다", "success", "project_create");
   revalidatePath(`/${orgSlug}/projects`);
 }
 
@@ -51,7 +51,7 @@ export async function createRelease(formData: FormData) {
   const version = String(formData.get("version") ?? "").trim();
   if (!orgSlug || !projectId || !version) return;
   await createReleaseForCurrentOrg(orgSlug, projectId, version);
-  await setFlashToast("릴리즈를 생성했습니다");
+  await setFlashToast("릴리즈를 생성했습니다", "success", "release_create");
   revalidatePath(`/${orgSlug}/projects/${projectId}`);
 }
 
@@ -81,7 +81,7 @@ export async function createQaSession(formData: FormData) {
     createdBy,
     expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
   });
-  await setFlashToast("QA URL을 발급했습니다");
+  await setFlashToast("QA URL을 발급했습니다", "success", "qa_session_create");
   revalidatePath(`/${orgSlug}/projects/${projectId}/releases/${releaseId}`);
 }
 

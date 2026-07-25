@@ -112,12 +112,20 @@ export default async function ReleasePage({
                 </StatusBadge>
                 <QaSessionAccessToggle />
                 <span className="flex items-center gap-1.5">
-                  <CopyButton value={url} label="피드백모드 URL" variant="secondary" />
+                  <CopyButton
+                    value={url}
+                    label="피드백모드 URL"
+                    variant="secondary"
+                    event="qa_url_copy"
+                    eventParams={{ url_type: "feedback" }}
+                  />
                   <CopyButton
                     value={`/board/${s.token}`}
                     label="이슈보드 URL"
                     variant="secondary"
                     relativeToOrigin
+                    event="qa_url_copy"
+                    eventParams={{ url_type: "board" }}
                   />
                 </span>
                 <span className="ml-auto text-xs text-subtle">

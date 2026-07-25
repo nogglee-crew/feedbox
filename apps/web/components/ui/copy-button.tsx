@@ -4,12 +4,15 @@ import { useState } from "react";
 import { HiCheck, HiOutlineClipboard } from "react-icons/hi2";
 import { Button, type ButtonVariant } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
+import { trackEvent, type AnalyticsParams } from "@/lib/analytics";
 
 export function CopyButton({
   value,
   label = "복사",
   variant = "ghost",
   relativeToOrigin = false,
+  event,
+  eventParams,
   className,
 }: {
   value: string;
@@ -17,6 +20,9 @@ export function CopyButton({
   variant?: ButtonVariant;
   /** value가 경로일 때 현재 origin을 붙여 절대 URL로 복사한다 */
   relativeToOrigin?: boolean;
+  /** 복사에 성공했을 때 전송할 GA4 이벤트 이름 */
+  event?: string;
+  eventParams?: AnalyticsParams;
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
@@ -29,6 +35,7 @@ export function CopyButton({
       onClick={async () => {
         const text = relativeToOrigin ? `${window.location.origin}${value}` : value;
         await navigator.clipboard.writeText(text);
+        if (event) trackEvent(event, eventParams);
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
