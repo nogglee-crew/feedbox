@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   addOrganizationMember,
   createOrganizationForCurrentUser,
+  deleteOrganization,
   findOrganizationForCurrentUser,
   isOrganizationSlugAvailable,
   removeOrganizationMember,
@@ -53,6 +54,17 @@ export async function updateOrgSlug(formData: FormData) {
   await setFlashToast("팀 URL을 저장했습니다");
   revalidatePath("/", "layout");
   if (org.slug !== currentSlug) redirect(`/${org.slug}/settings/teams`);
+}
+
+export async function deleteOrg(formData: FormData) {
+  const orgId = String(formData.get("org_id") ?? "");
+  const confirmName = String(formData.get("confirm_name") ?? "");
+  if (!orgId) return;
+  await deleteOrganization({ orgId, confirmName });
+  await setFlashToast("팀을 삭제했습니다");
+  // 삭제한 팀이 활성 팀일 수 있어 남은 팀을 다시 고르게 한다
+  revalidatePath("/", "layout");
+  redirect("/projects");
 }
 
 export async function addOrgMember(formData: FormData) {

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createOrganization } from "@/app/org-actions";
 import { Button } from "@/components/ui/button";
+import { CopyText } from "@/components/ui/copy-text";
 import { Input } from "@/components/ui/input";
 import { getUser, isAuthEnabled } from "@/lib/auth";
 import { loadOrgContext } from "@/lib/orgs";
@@ -31,7 +32,8 @@ export default async function OnboardingPage() {
           </Button>
         </form>
         <p className="text-xs text-subtle">
-          이미 팀이 있다면 owner에게 <b>{user.email}</b> 초대를 요청하세요.
+          이미 팀이 있다면 owner에게 <CopyText value={user.email} className="text-xs" /> 초대를
+          요청하세요.
         </p>
       </div>
     </div>

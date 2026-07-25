@@ -5,6 +5,7 @@ import { OrgSlugForm } from "@/features/organizations/components/org-slug-form";
 import { PlanBadge } from "@/features/billing/components/plan-badge";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { CreateTeamButton } from "@/features/organizations/components/create-team";
+import { DeleteTeamButton } from "@/features/organizations/components/delete-team-button";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,11 @@ export const metadata = { title: "팀 관리" };
 
 export const dynamic = "force-dynamic";
 
-export default async function TeamsPage({ params }: { params: Promise<{ orgSlug: string }> }) {
+export default async function TeamsPage({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>;
+}) {
   const { orgSlug } = await params;
   const ctx = await requireOrgBySlug(orgSlug);
   const membersByOrg = new Map(
@@ -33,7 +38,8 @@ export default async function TeamsPage({ params }: { params: Promise<{ orgSlug:
         <div>
           <h1 className="text-2xl font-bold">팀 관리</h1>
           <p className="mt-1 text-sm text-muted">
-            새 팀을 만들고, 팀 이름과 멤버를 관리합니다.
+            내가 속한 팀 목록입니다. 프로젝트는 팀 단위로 관리되며, 소유한 팀은
+            이름과 URL을 바꾸거나 멤버를 초대할 수 있습니다.
           </p>
         </div>
         <CreateTeamButton />
@@ -41,7 +47,6 @@ export default async function TeamsPage({ params }: { params: Promise<{ orgSlug:
 
       <ul className="space-y-3">
         {ctx.memberships.map(({ org, role }) => {
-          const isActive = org.id === ctx.org.id;
           const isOwner = role === "owner";
           return (
             <li key={org.id} className={cardClasses()}>
@@ -51,16 +56,25 @@ export default async function TeamsPage({ params }: { params: Promise<{ orgSlug:
                   <PlanBadge paid={hasPaidAccess(org)} />
                   <RoleBadge role={role} />
                 </div>
-                {isActive && (
-                  <Link href={`/${ctx.org.slug}/settings/members`} className={buttonClasses("secondary", "sm")}>
-                    멤버 관리
-                  </Link>
+                {isOwner && (
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/${org.slug}/settings/members`}
+                      className={buttonClasses("secondary", "sm")}
+                    >
+                      멤버 관리
+                    </Link>
+                    <DeleteTeamButton orgId={org.id} teamName={org.name} />
+                  </div>
                 )}
               </div>
 
               {isOwner && (
                 <>
-                  <form action={renameOrg} className="mt-4 flex items-end gap-2">
+                  <form
+                    action={renameOrg}
+                    className="mt-4 flex items-end gap-2"
+                  >
                     <input type="hidden" name="org_id" value={org.id} />
                     <Input
                       id={`rename-org-${org.id}`}
@@ -82,10 +96,6 @@ export default async function TeamsPage({ params }: { params: Promise<{ orgSlug:
           );
         })}
       </ul>
-
-      <p className="text-xs text-subtle">
-        팀 전환은 메인 화면 상단의 팀명 옆 화살표에서 할 수 있습니다.
-      </p>
     </div>
   );
 }

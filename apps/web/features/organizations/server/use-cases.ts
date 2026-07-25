@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getUser } from "@/lib/auth";
+import { deleteProjectScreenshots } from "@/features/issues/server/sdk-issues";
 import { prisma } from "@/lib/db";
 import { normalizeOrgSlug, validateOrgSlug } from "@/lib/org-slugs";
 import { assertOwner } from "@/lib/orgs";
@@ -137,6 +138,30 @@ export async function updateOrganizationSlug(input: {
       throw new Error("이미 사용 중인 팀 URL입니다");
     }
     throw error_;
+  }
+}
+
+export async function deleteOrganization(input: {
+  orgId: string;
+  confirmName: string;
+}): Promise<void> {
+  await assertOwner(input.orgId);
+
+  const org = await prisma.organization.findUnique({
+    where: { id: input.orgId },
+    select: { name: true, projects: { select: { id: true } } },
+  });
+  if (!org) throw new Error("팀을 찾을 수 없습니다");
+  // 되돌릴 수 없는 작업이라 이름 확인을 서버에서도 다시 검사한다
+  if (input.confirmName.trim() !== org.name) {
+    throw new Error("팀 이름이 일치하지 않습니다");
+  }
+
+  // 프로젝트·릴리즈·세션·이슈는 스키마의 cascade로 함께 지워진다
+  await prisma.organization.delete({ where: { id: input.orgId } });
+  // 스토리지는 DB 트랜잭션 밖이라 뒤에 둔다. 실패해도 고아 파일만 남는다
+  for (const project of org.projects) {
+    await deleteProjectScreenshots(project.id);
   }
 }
 

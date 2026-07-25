@@ -56,7 +56,8 @@ export default function DemoPage() {
   const apiKey = process.env.NEXT_PUBLIC_DEMO_API_KEY ?? "";
 
   return (
-    <FeedboxProvider projectKey={projectKey} apiKey={apiKey}>
+    // apiBaseUrl=""는 현재 origin. FEEDBOX 자신이므로 로컬 개발에서도 맞다
+    <FeedboxProvider projectKey={projectKey} apiKey={apiKey} apiBaseUrl="">
       <div className="space-y-8 py-4">
         <header className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
