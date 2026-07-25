@@ -37,7 +37,7 @@ export function ProfileMenu({
         triggerClassName="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 hover:bg-surface-hover"
         trigger={
           <>
-            <Avatar name={displayName} src={avatarUrl} />
+            <Avatar name={displayName} src={avatarUrl} size="lg" />
             <span className="text-sm font-semibold text-foreground">{displayName}</span>
           </>
         }

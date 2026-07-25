@@ -4,14 +4,17 @@ export function Avatar({
   name,
   src,
   ring = false,
+  size = "md",
   className,
 }: {
   name: string;
   src?: string | null;
   ring?: boolean;
+  size?: "sm" | "md" | "lg";
   className?: string;
 }) {
-  const shape = cn("size-7 shrink-0 rounded-full", ring && "ring-2 ring-surface", className);
+  const sizeClass = size === "sm" ? "size-4" : size === "lg" ? "size-7" : "size-6";
+  const shape = cn(sizeClass, "shrink-0 rounded-full", ring && "ring-2 ring-surface", className);
 
   if (src) {
     return (

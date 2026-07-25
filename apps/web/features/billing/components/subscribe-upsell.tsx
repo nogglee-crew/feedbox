@@ -2,6 +2,7 @@ import { requestSubscriptionNotify } from "@/app/subscribe-actions";
 import { Dot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
 export function SubscribeUpsell({
@@ -45,16 +46,12 @@ export function SubscribeUpsell({
               출시 알림 받기
             </Button>
           </div>
-          <label className="flex cursor-pointer items-start gap-2 text-xs text-muted">
-            <input type="checkbox" name="privacy_agree" required className="mt-0.5" />
-            <span>
-              (필수) 개인정보 수집·이용에 동의합니다.
-              <span className="mt-0.5 block text-subtle">
-                수집 항목: 이메일 주소 · 수집 목적: 구독 서비스 출시 알림 발송 · 보유 기간: 알림 발송 완료
-                또는 동의 철회 시까지. 동의를 거부할 수 있으며, 거부 시 출시 알림을 받을 수 없습니다.
-              </span>
-            </span>
-          </label>
+          <Checkbox
+            name="privacy_agree"
+            required
+            label="(필수) 개인정보 수집·이용에 동의합니다."
+            description="수집 항목: 이메일 주소 · 수집 목적: 구독 서비스 출시 알림 발송 · 보유 기간: 알림 발송 완료 또는 동의 철회 시까지. 동의를 거부할 수 있으며, 거부 시 출시 알림을 받을 수 없습니다."
+          />
         </form>
       )}
     </Card>

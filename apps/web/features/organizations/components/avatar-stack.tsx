@@ -2,7 +2,7 @@ import { Avatar } from "@/components/ui/avatar";
 import type { OrgMemberProfile } from "@/lib/types";
 
 export function MemberAvatar({ member, className }: { member: OrgMemberProfile; className?: string }) {
-  return <Avatar name={member.name ?? member.email} src={member.avatar_url} ring className={className} />;
+  return <Avatar name={member.name ?? member.email} src={member.avatar_url} ring size="lg" className={className} />;
 }
 
 export function AvatarStack({ members, max = 5 }: { members: OrgMemberProfile[]; max?: number }) {

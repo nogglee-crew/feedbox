@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "./cn";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "dangerSolid";
@@ -41,6 +41,21 @@ export function Button({
   ...props
 }: ButtonProps) {
   return <button type={type} className={cn(buttonClasses(variant, size), className)} {...props} />;
+}
+
+interface AnchorButtonProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
+}
+
+export function AnchorButton({
+  variant = "secondary",
+  size = "md",
+  className,
+  ...props
+}: AnchorButtonProps) {
+  return <a className={cn(buttonClasses(variant, size), className)} {...props} />;
 }
 
 interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
