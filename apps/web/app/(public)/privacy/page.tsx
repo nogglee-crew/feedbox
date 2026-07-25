@@ -49,6 +49,11 @@ export default function PrivacyPage() {
               "이메일 주소, 동의 일시",
               "출시 알림을 신청할 때",
             ],
+            [
+              "서비스 이용 기록",
+              "쿠키 등 유사 식별자, 방문한 페이지와 머문 시간, 유입 경로, 기기·운영체제·브라우저 정보, IP 주소로 추정한 국가·도시 수준의 위치, 버튼 클릭 등 화면에서 발생한 동작",
+              "서비스의 웹 페이지를 방문할 때(이슈 보드 등 공개 페이지 포함)",
+            ],
           ]}
         />
         <p>
@@ -69,6 +74,7 @@ export default function PrivacyPage() {
             "피드백 수집·조회·상태 관리 등 서비스 핵심 기능 제공",
             "이슈 보드를 통한 처리 현황 공유",
             "서비스 안정성 확보와 오·남용 방지",
+            "서비스 이용 현황 통계 분석과 기능 개선",
             "구독 서비스 출시 알림 발송(동의한 경우에 한함)",
           ]}
         />
@@ -80,6 +86,7 @@ export default function PrivacyPage() {
             "계정 정보: 회원 탈퇴 시까지. 탈퇴하면 계정과 팀 멤버 정보가 즉시 삭제됩니다.",
             "피드백(이슈)과 스크린샷: 해당 프로젝트 또는 팀이 삭제될 때까지. 프로젝트를 삭제하면 이슈와 스크린샷 파일이 함께 삭제됩니다.",
             "구독 알림 신청 정보: 알림 발송 완료 또는 동의 철회 시까지",
+            "서비스 이용 기록: 수집일로부터 최대 14개월",
             "관련 법령에서 별도 보존을 요구하는 경우 해당 기간 동안 보관합니다.",
           ]}
         />
@@ -104,6 +111,11 @@ export default function PrivacyPage() {
             ["Supabase, Inc.", "인증, 데이터베이스, 파일 저장", "해외 인프라"],
             ["Vercel, Inc.", "애플리케이션 호스팅", "해외 인프라"],
             ["Google LLC", "Google 계정 로그인", "인증 수단 제공"],
+            [
+              "Google LLC",
+              "서비스 이용 통계 분석(Google Analytics)",
+              "해외 인프라",
+            ],
           ]}
         />
         <p>
@@ -112,7 +124,39 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="6. 이용자의 권리">
+      <LegalSection title="6. 쿠키 및 분석 도구">
+        <p>
+          회사는 서비스 이용 현황을 파악하고 개선하기 위해 Google LLC의 Google Analytics를
+          사용하며, 이 과정에서 쿠키 등 유사 기술이 사용됩니다. 분석은 서비스의 웹 페이지 전반에
+          적용되며, 여기에는 팀이 발급한 링크로 접속하는 이슈 보드 등 공개 페이지가 포함됩니다.
+        </p>
+        <p>
+          분석 도구에는 이름, 이메일 주소 등 개인을 직접 식별할 수 있는 정보와 피드백 본문,
+          스크린샷을 전송하지 않습니다. 수집되는 값은 방문 페이지, 유입 경로, 기기·브라우저 정보와
+          버튼 클릭 등 동작 기록으로 한정됩니다.
+        </p>
+        <p>이용자는 아래 방법으로 분석을 거부할 수 있습니다.</p>
+        <LegalList
+          items={[
+            "브라우저 설정에서 쿠키 저장을 차단하거나 저장된 쿠키를 삭제",
+            <>
+              Google에서 제공하는{" "}
+              <a
+                className="underline"
+                href="https://tools.google.com/dlpage/gaoptout"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Google Analytics 차단 브라우저 부가기능
+              </a>{" "}
+              설치
+            </>,
+          ]}
+        />
+        <p>분석을 거부하더라도 서비스 이용에는 제한이 없습니다.</p>
+      </LegalSection>
+
+      <LegalSection title="7. 이용자의 권리">
         <p>
           이용자는 언제든지 자신의 개인정보에 대한 열람, 정정, 삭제, 처리 정지를 요구할 수
           있습니다. 계정 삭제는 서비스 내 프로필 메뉴의 &ldquo;회원탈퇴&rdquo;에서 직접 할 수
@@ -120,7 +164,7 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="7. 안전성 확보 조치">
+      <LegalSection title="8. 안전성 확보 조치">
         <LegalList
           items={[
             "전송 구간 암호화(HTTPS) 적용",
@@ -131,7 +175,7 @@ export default function PrivacyPage() {
         />
       </LegalSection>
 
-      <LegalSection title="8. 개인정보 보호책임자">
+      <LegalSection title="9. 개인정보 보호책임자">
         <LegalList
           items={[
             "상호: 노글리크루",
@@ -144,7 +188,7 @@ export default function PrivacyPage() {
         />
       </LegalSection>
 
-      <LegalSection title="9. 방침의 변경">
+      <LegalSection title="10. 방침의 변경">
         <p>
           본 방침이 변경되는 경우 시행일 최소 7일 전에 서비스 내 공지사항 또는 본 페이지를 통해
           알립니다. 이용자에게 불리한 변경은 30일 전에 알립니다.
