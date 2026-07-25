@@ -71,6 +71,7 @@ const styles = {
     background: "#6366f1",
     color: "#ffffff",
   },
+  // 어두운 툴바 위에서 쓴다
   buttonGhost: {
     border: "1px solid #374151",
     borderRadius: 8,
@@ -79,6 +80,16 @@ const styles = {
     cursor: "pointer",
     background: "transparent",
     color: "#d1d5db",
+  },
+  // 흰 패널 위에서 쓴다
+  buttonQuiet: {
+    border: "1px solid #e5e7eb",
+    borderRadius: 8,
+    padding: "6px 11px",
+    fontSize: 13,
+    cursor: "pointer",
+    background: "transparent",
+    color: "#6b7280",
   },
   highlight: {
     position: "fixed",
@@ -213,7 +224,7 @@ export function FeedboxLoadingToolbar() {
           cursor: "not-allowed",
         }}
       >
-        요소 선택
+        피드백 남기기
       </button>
     </div>,
     document.body,
@@ -316,12 +327,38 @@ export function FeedboxOverlay({
     setWithScreenshot(true);
   }, []);
 
+  useEffect(() => {
+    if (mode !== "editing") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitting) reset();
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [mode, reset, submitting]);
+
+  // ESC를 토글로 쓴다. picking에서 나가는 것뿐 아니라 들어가는 것도 같은 키로 한다
+  useEffect(() => {
+    if (mode !== "idle" || !isFeedbackOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const el = document.activeElement;
+      // 호스트 페이지에서 입력 중이면 그쪽 ESC를 빼앗지 않는다
+      if (el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) {
+        return;
+      }
+      reset();
+      setMode("picking");
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [mode, isFeedbackOpen, reset]);
+
   const submit = useCallback(async () => {
     if (!target || !memo.trim() || submitting) return;
     setSubmitting(true);
     setError(null);
     try {
-      const screenshot = withScreenshot ? await captureScreenshot() : null;
+      const screenshot = withScreenshot ? await captureScreenshot(target.rect) : null;
       const issue = await createIssue(config, session.token, {
         pageUrl: window.location.href,
         selector: target.selector,
@@ -418,7 +455,7 @@ export function FeedboxOverlay({
             </label>
             {error && <div style={{ color: "#dc2626", fontSize: 12 }}>{error}</div>}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <button type="button" style={styles.buttonGhost as React.CSSProperties} onClick={reset}>
+              <button type="button" style={styles.buttonQuiet as React.CSSProperties} onClick={reset}>
                 취소
               </button>
               <button
@@ -469,7 +506,7 @@ export function FeedboxOverlay({
           rel="noreferrer"
           style={{ ...(styles.buttonGhost as React.CSSProperties), textDecoration: "none" }}
         >
-          이슈 현황
+          이슈 보드
         </a>
         {mode === "picking" ? (
           <button
@@ -497,7 +534,7 @@ export function FeedboxOverlay({
               setMode("picking");
             }}
           >
-            요소 선택
+            피드백 남기기 (ESC)
           </button>
         )}
       </div>
