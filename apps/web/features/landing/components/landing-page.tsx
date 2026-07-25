@@ -120,11 +120,12 @@ const AUDIENCES = [
 const JSON_LD = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "피드박스 | FEEDBOX",
+  name: "FEEDBOX",
+  alternateName: "피드박스",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Web",
   description:
-    "화면에서 문제가 된 곳을 찍고 메모를 남보세요. 셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷까지 피드박스가 자동으로 수집해드릴게요.",
+    "FEEDBOX(피드박스)는 웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼입니다. 사용자가 화면에서 문제가 된 요소를 찍고 메모를 남기면 셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷이 자동으로 첨부됩니다.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
 };
 
@@ -159,7 +160,7 @@ export function LandingPage() {
         <section className="mx-auto grid w-full max-w-5xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
           <div className="space-y-6">
             <p className="text-sm font-semibold text-muted">
-              웹 QA 피드백 플랫폼
+              <span className="text-foreground">FEEDBOX</span> · 웹 QA 피드백 플랫폼
             </p>
             <h1 className="text-4xl font-extrabold leading-tight">
               버그 제보를 받는
@@ -167,7 +168,7 @@ export function LandingPage() {
               가장 짧은 경로
             </h1>
             <p className="max-w-md text-base text-muted">
-              화면에서 문제가 된 곳을 찍고 메모를 남보세요.
+              화면에서 문제가 된 곳을 찍고 메모를 남겨보세요.
               <br />
               셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷까지
               <br />

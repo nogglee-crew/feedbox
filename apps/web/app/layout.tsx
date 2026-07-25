@@ -7,28 +7,29 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  // OAuth 동의 화면의 앱 이름("feedbox")과 첫 단어가 일치해야 구글 인증을 통과한다
   title: {
-    default: "피드박스 | FEEDBOX",
+    default: "FEEDBOX 피드박스 | 웹 QA 피드백 플랫폼",
     template: "%s | FEEDBOX",
   },
   description:
-    "버그 제보를 받는 가장 짧은 경로 피드박스",
+    "FEEDBOX(피드박스)는 웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼입니다. 사용자가 화면에서 문제가 된 요소를 찍고 메모를 남기면 셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷이 자동으로 첨부됩니다.",
   keywords: ["QA", "버그 제보", "피드백 수집", "웹 피드백", "이슈 트래킹", "SDK"],
   icons: { icon: "/icon.png" },
   openGraph: {
     type: "website",
     siteName: "FEEDBOX",
-    title: "피드박스 | FEEDBOX",
+    title: "FEEDBOX 피드박스 | 웹 QA 피드백 플랫폼",
     description:
-      "버그 제보를 받는 가장 짧은 경로 피드박스",
+      "웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼. 화면에서 문제가 된 요소를 찍고 메모만 남기면 재현 정보가 자동으로 첨부됩니다.",
     url: siteUrl,
     images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "FEEDBOX" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "피드박스 | FEEDBOX",
+    title: "FEEDBOX 피드박스 | 웹 QA 피드백 플랫폼",
     description:
-      "버그 제보를 받는 가장 짧은 경로 피드박스",
+      "웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼. 화면에서 문제가 된 요소를 찍고 메모만 남기면 재현 정보가 자동으로 첨부됩니다.",
     images: ["/opengraph-image.png"],
   },
 };
