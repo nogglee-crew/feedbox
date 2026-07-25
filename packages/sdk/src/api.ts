@@ -6,8 +6,11 @@ import type {
 } from "./types";
 import { untrackedFetch } from "./diagnostics";
 
+/** 셀프 호스팅이 아니면 항상 같은 값이라 기본값으로 둔다 */
+const DEFAULT_API_BASE_URL = "https://feedbox.nogglee.com";
+
 function baseUrl(config: FeedboxConfig): string {
-  return (config.apiBaseUrl ?? "").replace(/\/$/, "");
+  return (config.apiBaseUrl ?? DEFAULT_API_BASE_URL).replace(/\/$/, "");
 }
 
 async function post<T>(config: FeedboxConfig, path: string, body: unknown): Promise<T> {

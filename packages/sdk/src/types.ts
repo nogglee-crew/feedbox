@@ -1,7 +1,10 @@
 export interface FeedboxConfig {
   projectKey: string;
   apiKey: string;
-  /** Defaults to the host application's origin. */
+  /**
+   * FEEDBOX 서버 주소. 기본값은 https://feedbox.nogglee.com 이며
+   * 셀프 호스팅일 때만 지정한다. 빈 문자열이면 현재 origin을 쓴다.
+   */
   apiBaseUrl?: string;
 }
 
