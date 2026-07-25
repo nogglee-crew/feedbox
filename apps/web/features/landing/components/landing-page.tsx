@@ -99,16 +99,34 @@ const AUDIENCES = [
   },
 ];
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 const JSON_LD = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "FEEDBOX",
-  alternateName: "피드박스",
-  applicationCategory: "DeveloperApplication",
-  operatingSystem: "Web",
-  description:
-    "FEEDBOX(피드박스)는 웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼입니다. 사용자가 화면에서 문제가 된 요소를 찍고 메모를 남기면 셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷이 자동으로 첨부됩니다.",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "FEEDBOX",
+      url: SITE_URL,
+      logo: `${SITE_URL}/feedbox-logo.png`,
+      sameAs: ["https://github.com/nogglee-crew/feedbox"],
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#software`,
+      name: "FEEDBOX",
+      alternateName: "피드박스",
+      url: SITE_URL,
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web",
+      inLanguage: "ko",
+      description:
+        "FEEDBOX(피드박스)는 웹 서비스의 버그 제보를 수집하는 QA 피드백 플랫폼입니다. 사용자가 화면에서 문제가 된 요소를 찍고 메모를 남기면 셀렉터, 에러, API 호출, 브라우저 환경, 스크린샷이 자동으로 첨부됩니다.",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+    },
+  ],
 };
 
 export function LandingPage() {

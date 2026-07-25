@@ -5,6 +5,7 @@ import { HiCheck, HiClipboardDocument } from "react-icons/hi2";
 import { IconButton } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { formatBrowser } from "@/features/issues/components/issue-meta";
+import { trackEvent } from "@/lib/analytics";
 import type { Issue, IssueStatus } from "@/lib/types";
 
 function issueClipboardJson({
@@ -82,6 +83,7 @@ export function IssueCopyButton({
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(issueClipboardJson({ issue, status, assignee }));
+          trackEvent("issue_copy_for_agent", { issue_status: status });
           setCopied(true);
           showToast({ message: "이슈 정보를 복사했습니다", tone: "success" });
           setTimeout(() => setCopied(false), 1500);
