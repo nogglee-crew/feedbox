@@ -20,8 +20,25 @@ function createPrismaClient(): PrismaClient {
   });
 }
 
-export const prisma = globalForPrisma.feedboxPrisma ?? createPrismaClient();
+let client: PrismaClient | undefined;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.feedboxPrisma = prisma;
+function getPrismaClient(): PrismaClient {
+  if (client) return client;
+  client = globalForPrisma.feedboxPrisma ?? createPrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.feedboxPrisma = client;
+  }
+  return client;
 }
+
+/**
+ * 첫 사용 시점까지 생성을 미룬다.
+ * next build의 page data 수집 단계가 이 모듈을 import하는데,
+ * 빌드는 DB에 접근하지 않으므로 연결 문자열을 요구해서는 안 된다.
+ */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const value = Reflect.get(getPrismaClient(), property) as unknown;
+    return typeof value === "function" ? value.bind(getPrismaClient()) : value;
+  },
+});
