@@ -37,7 +37,7 @@ export function CollapsibleSection({
             {title}
             <HiChevronDown
               aria-hidden
-              className={cn("size-5 text-subtle transition-transform", !open && "-rotate-90")}
+              className={cn("size-5 text-subtle transition-[rotate]", !open && "-rotate-90")}
             />
           </button>
         </h2>

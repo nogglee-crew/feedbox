@@ -43,7 +43,7 @@ export function Switch({ checked, onChange, label, labelHidden, disabled, classN
         <span
           aria-hidden
           className={cn(
-            "size-4 rounded-full bg-surface shadow-sm transition-transform",
+            "size-4 rounded-full bg-surface shadow-sm transition-[translate]",
             checked ? "translate-x-4" : "translate-x-0",
           )}
         />

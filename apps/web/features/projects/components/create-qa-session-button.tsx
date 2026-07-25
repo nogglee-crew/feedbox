@@ -8,8 +8,10 @@ import { Modal } from "@/components/ui/modal";
 
 export function CreateQaSessionButton({
   projectId,
+  orgSlug,
   releaseId,
 }: {
+  orgSlug: string;
   projectId: string;
   releaseId: string;
 }) {
@@ -33,6 +35,7 @@ export function CreateQaSessionButton({
           className="mt-4 space-y-3"
         >
           <input type="hidden" name="project_id" value={projectId} />
+          <input type="hidden" name="org_slug" value={orgSlug} />
           <input type="hidden" name="release_id" value={releaseId} />
           <Input
             id="qa-session-created-by"

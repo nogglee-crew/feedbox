@@ -46,6 +46,7 @@ enum IssueStatus {
 model Organization {
   id                    String           @id @default(uuid()) @db.Uuid
   name                  String
+  slug                  String           @unique
   plan                  Plan             @default(FREE)
   billingStatus         BillingStatus    @default(UNPAID) @map("billing_status")
   accessOverride        AccessOverride   @default(NONE) @map("access_override")

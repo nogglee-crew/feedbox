@@ -1,0 +1,25 @@
+import Image from "next/image";
+
+/**
+ * 고객사가 보는 공개 화면에만 노출하는 출처 배지.
+ * SDK 툴바(우측 하단)와 겹치지 않도록 좌측 하단에 고정한다.
+ */
+export function MadeByBadge() {
+  return (
+    <a
+      href="/?ref=board"
+      target="_blank"
+      rel="noreferrer"
+      className="fixed bottom-5 left-5 z-30 inline-flex items-center gap-2 rounded-full border border-border bg-surface/90 px-3 py-1.5 text-xs text-subtle shadow-lg backdrop-blur-sm transition-colors hover:border-border-strong hover:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-subtle"
+    >
+      Made by
+      <Image
+        src="/feedbox-logo.png"
+        alt="FEEDBOX"
+        width={1468}
+        height={284}
+        className="h-3 w-auto"
+      />
+    </a>
+  );
+}

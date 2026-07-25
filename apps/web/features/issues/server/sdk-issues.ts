@@ -73,3 +73,19 @@ export async function saveScreenshot(
   if (error) return null;
   return storage.from("screenshots").getPublicUrl(path).data.publicUrl;
 }
+
+/**
+ * 프로젝트 스크린샷을 모두 지운다.
+ * 업로드 경로가 `{projectId}/...` 규칙이라 접두어로 묶어서 제거할 수 있다.
+ */
+export async function deleteProjectScreenshots(projectId: string): Promise<void> {
+  const bucket = supabaseAdmin().storage.from("screenshots");
+  const PAGE = 100;
+
+  for (let offset = 0; ; offset += PAGE) {
+    const { data, error } = await bucket.list(projectId, { limit: PAGE, offset });
+    if (error || !data?.length) return;
+    await bucket.remove(data.map((file) => `${projectId}/${file.name}`));
+    if (data.length < PAGE) return;
+  }
+}

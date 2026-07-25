@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { projectLimit } from "@/features/billing/domain/entitlements";
+import { deleteProjectScreenshots } from "@/features/issues/server/sdk-issues";
 import { prisma } from "@/lib/db";
-import { requireOrg } from "@/lib/orgs";
+import { requireOrgBySlug } from "@/lib/orgs";
 import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
 
 function slugify(name: string): string {
@@ -12,8 +13,8 @@ function slugify(name: string): string {
   return slug || "project";
 }
 
-async function requireProject(projectId: string) {
-  const ctx = await requireOrg();
+async function requireProject(orgSlug: string, projectId: string) {
+  const ctx = await requireOrgBySlug(orgSlug);
   if (!ctx) throw new Error("Supabase Auth 환경변수가 필요합니다");
 
   const project = await prisma.project.findFirst({
@@ -24,10 +25,11 @@ async function requireProject(projectId: string) {
 }
 
 export async function createProjectForCurrentOrg(input: {
+  orgSlug: string;
   name: string;
   baseUrl: string | null;
 }): Promise<void> {
-  const ctx = await requireOrg();
+  const ctx = await requireOrgBySlug(input.orgSlug);
   if (!ctx) throw new Error("Supabase Auth 환경변수가 필요합니다");
 
   const baseKey = slugify(input.name);
@@ -56,33 +58,48 @@ export async function createProjectForCurrentOrg(input: {
   );
 }
 
-export async function deleteProjectForCurrentOrg(projectId: string): Promise<void> {
-  await requireProject(projectId);
+export async function deleteProjectForCurrentOrg(
+  orgSlug: string,
+  projectId: string,
+  confirmName: string,
+): Promise<void> {
+  const { project } = await requireProject(orgSlug, projectId);
+  // 되돌릴 수 없는 작업이라 이름 확인을 서버에서도 다시 검사한다
+  if (confirmName.trim() !== project.name) {
+    throw new Error("프로젝트 이름이 일치하지 않습니다");
+  }
+
+  // 릴리즈·세션·이슈는 스키마의 cascade로 함께 지워진다
   await prisma.project.delete({ where: { id: projectId } });
+  // 스토리지는 DB 트랜잭션 밖이라 뒤에 둔다. 실패해도 고아 파일만 남고 화면은 깨지지 않는다
+  await deleteProjectScreenshots(projectId);
 }
 
 export async function updateProjectBaseUrlForCurrentOrg(
+  orgSlug: string,
   projectId: string,
   baseUrl: string | null,
 ): Promise<void> {
-  await requireProject(projectId);
+  await requireProject(orgSlug, projectId);
   await prisma.project.update({ where: { id: projectId }, data: { baseUrl } });
 }
 
 export async function createReleaseForCurrentOrg(
+  orgSlug: string,
   projectId: string,
   version: string,
 ): Promise<void> {
-  await requireProject(projectId);
+  await requireProject(orgSlug, projectId);
   await prisma.release.create({ data: { projectId, version } });
 }
 
 export async function setReleaseStatusForCurrentOrg(input: {
+  orgSlug: string;
   projectId: string;
   releaseId: string;
   status: "OPEN" | "CLOSED";
 }): Promise<void> {
-  await requireProject(input.projectId);
+  await requireProject(input.orgSlug, input.projectId);
   const release = await prisma.release.findFirst({
     where: { id: input.releaseId, projectId: input.projectId },
     select: { id: true },
@@ -105,12 +122,13 @@ export async function setReleaseStatusForCurrentOrg(input: {
 }
 
 export async function createSessionForCurrentOrg(input: {
+  orgSlug: string;
   projectId: string;
   releaseId: string;
   createdBy: string | null;
   expiresAt: Date;
 }): Promise<void> {
-  await requireProject(input.projectId);
+  await requireProject(input.orgSlug, input.projectId);
   const release = await prisma.release.findFirst({
     where: { id: input.releaseId, projectId: input.projectId },
     select: { id: true, status: true },
@@ -130,11 +148,12 @@ export async function createSessionForCurrentOrg(input: {
 }
 
 export async function revokeSessionForCurrentOrg(input: {
+  orgSlug: string;
   projectId: string;
   releaseId: string;
   sessionId: string;
 }): Promise<void> {
-  await requireProject(input.projectId);
+  await requireProject(input.orgSlug, input.projectId);
   const session = await prisma.qaSession.findFirst({
     where: {
       id: input.sessionId,
@@ -148,10 +167,11 @@ export async function revokeSessionForCurrentOrg(input: {
 }
 
 export async function updateIssueForCurrentOrg(
+  orgSlug: string,
   issueId: number,
   patch: { status?: string; assignee?: string | null },
 ): Promise<void> {
-  const ctx = await requireOrg();
+  const ctx = await requireOrgBySlug(orgSlug);
   if (!ctx) throw new Error("Supabase Auth 환경변수가 필요합니다");
 
   const issue = await prisma.issue.findFirst({
@@ -170,7 +190,7 @@ export async function updateIssueForCurrentOrg(
       },
       select: { id: true },
     });
-    if (!assignee) throw new Error("조직 멤버만 담당자로 지정할 수 있습니다");
+    if (!assignee) throw new Error("팀 멤버만 담당자로 지정할 수 있습니다");
   }
 
   const status = ISSUE_STATUSES.includes(patch.status as IssueStatus)

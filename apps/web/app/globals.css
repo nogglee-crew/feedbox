@@ -218,9 +218,135 @@
   }
 }
 
+/* 랜딩 기능 카드의 미니 비네트. JS 없이 표현하려고 keyframes로 둔다 */
+@layer utilities {
+  .fx-ring {
+    animation: fx-ring 2.8s ease-out infinite;
+  }
+
+  .fx-rise {
+    animation: fx-rise 2.8s ease-in-out infinite;
+  }
+
+  .fx-scan {
+    animation: fx-scan 2.8s ease-in-out infinite;
+  }
+
+  .fx-grow {
+    animation: fx-grow 2.8s ease-in-out infinite;
+  }
+
+  .fx-shift {
+    animation: fx-shift 2.8s ease-in-out infinite;
+  }
+
+  .fx-pop {
+    animation: fx-pop 2.8s ease-in-out infinite;
+  }
+
+  .fx-d1 {
+    animation-delay: 240ms;
+  }
+
+  .fx-d2 {
+    animation-delay: 480ms;
+  }
+}
+
+@keyframes fx-ring {
+  0% {
+    opacity: 0.9;
+    scale: 1;
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    scale: 1.4;
+  }
+}
+
+@keyframes fx-rise {
+  0%,
+  100% {
+    opacity: 0.25;
+    translate: 0 3px;
+  }
+
+  35%,
+  75% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes fx-scan {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+
+  15%,
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    translate: 0 250%;
+    opacity: 0;
+  }
+}
+
+@keyframes fx-grow {
+  0%,
+  100% {
+    width: 25%;
+  }
+
+  50%,
+  75% {
+    width: 85%;
+  }
+}
+
+@keyframes fx-shift {
+  0%,
+  40% {
+    translate: 0 0;
+  }
+
+  55%,
+  100% {
+    translate: 0 100%;
+  }
+}
+
+@keyframes fx-pop {
+  0%,
+  45% {
+    opacity: 0;
+    scale: 0.6;
+  }
+
+  60%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toast-slide-in,
   .toast-slide-out {
     animation-duration: 1ms;
+  }
+
+  .fx-ring,
+  .fx-rise,
+  .fx-scan,
+  .fx-grow,
+  .fx-shift,
+  .fx-pop {
+    animation: none;
   }
 }

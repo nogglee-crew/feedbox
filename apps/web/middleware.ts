@@ -3,11 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Tester-facing and authentication routes bypass dashboard auth.
 const PUBLIC_PATHS = [
-  /^\/login/,
+  // 랜딩. 로그인 여부 분기는 페이지가 직접 한다
+  /^\/$/,
+  /^\/auth\/sign-in/,
   /^\/auth\//,
   /^\/api\/sdk\//,
   /^\/demo/,
   /^\/board\//,
+  /^\/terms/,
+  /^\/privacy/,
 ];
 
 export async function middleware(request: NextRequest) {
@@ -40,7 +44,7 @@ export async function middleware(request: NextRequest) {
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims.sub) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
+    loginUrl.pathname = "/auth/sign-in";
     loginUrl.search = "";
     return NextResponse.redirect(loginUrl);
   }
@@ -49,5 +53,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // 정적 에셋과 SEO 파일은 인증 검사 없이 통과시킨다
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|svg|gif|webp|ico)).*)",
+  ],
 };

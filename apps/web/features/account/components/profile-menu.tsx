@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { HiChevronRight } from "react-icons/hi2";
 import { deleteAccount, signOut } from "@/app/auth/actions";
@@ -12,6 +14,7 @@ import { Modal } from "@/components/ui/modal";
 
 interface ProfileTeam {
   name: string;
+  slug: string;
   paid: boolean;
 }
 
@@ -20,14 +23,19 @@ export function ProfileMenu({
   email,
   avatarUrl,
   team,
+  teams = [],
 }: {
   name: string | null;
   email: string;
   avatarUrl: string | null;
   team: ProfileTeam | null;
+  teams?: ProfileTeam[];
 }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const pathname = usePathname();
   const displayName = name ?? email;
+  const activeSlug = pathname.split("/").filter(Boolean)[0];
+  const activeTeam = teams.find((candidate) => candidate.slug === activeSlug) ?? team;
 
   return (
     <>
@@ -49,13 +57,13 @@ export function ProfileMenu({
               <div className="mt-0.5 text-xs text-muted">{email}</div>
             </div>
 
-            {team && (
-              <Link href="/settings/teams" onClick={close} className={menuItemClasses("mt-1")}>
+            {activeTeam && (
+              <Link href={`/${activeTeam.slug}/settings/teams`} onClick={close} className={menuItemClasses("mt-1")}>
                 <span>
                   <span className="block text-xs text-subtle">선택된 팀</span>
                   <span className="mt-0.5 flex items-center gap-2 text-sm font-semibold">
-                    {team.name}
-                    <PlanBadge paid={team.paid} />
+                    {activeTeam.name}
+                    <PlanBadge paid={activeTeam.paid} />
                   </span>
                 </span>
                 <HiChevronRight aria-hidden className="size-4 text-subtle" />
@@ -105,5 +113,27 @@ export function ProfileMenu({
         </p>
       </Modal>
     </>
+  );
+}
+
+export function DashboardHomeLink({ teams }: { teams: ProfileTeam[] }) {
+  const pathname = usePathname();
+  const activeSlug = pathname.split("/").filter(Boolean)[0];
+  const activeTeam = teams.find((candidate) => candidate.slug === activeSlug);
+
+  return (
+    <Link
+      href={activeTeam ? `/${activeTeam.slug}/projects` : "/projects"}
+      aria-label="FEEDBOX 홈"
+    >
+      <Image
+        src="/feedbox-logo.png"
+        alt="FEEDBOX"
+        width={1468}
+        height={284}
+        priority
+        className="h-6 w-auto"
+      />
+    </Link>
   );
 }

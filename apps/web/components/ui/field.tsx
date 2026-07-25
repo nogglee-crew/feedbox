@@ -8,11 +8,14 @@ export interface FieldProps {
   label?: string;
   hint?: string;
   error?: string;
+  /** 검증을 통과했을 때의 확인 문구. error보다 우선순위가 낮다 */
+  success?: string;
   className?: string;
   children: ReactNode;
 }
 
-export function Field({ id, label, hint, error, className, children }: FieldProps) {
+export function Field({ id, label, hint, error, success, className, children }: FieldProps) {
+  const message = error ?? success ?? hint;
   return (
     <div className={cn("flex flex-col gap-1", className)}>
       {label && (
@@ -21,23 +24,29 @@ export function Field({ id, label, hint, error, className, children }: FieldProp
         </label>
       )}
       {children}
-      {error ? (
-        <p id={`${id}-error`} className="text-xs text-danger">
-          {error}
+      {message && (
+        <p
+          id={`${id}-${error ? "error" : success ? "success" : "hint"}`}
+          className={cn(
+            "text-xs",
+            error ? "text-danger" : success ? "text-success" : "text-subtle",
+          )}
+        >
+          {message}
         </p>
-      ) : (
-        hint && (
-          <p id={`${id}-hint`} className="text-xs text-subtle">
-            {hint}
-          </p>
-        )
       )}
     </div>
   );
 }
 
-export function describedBy(id: string, hint?: string, error?: string): string | undefined {
+export function describedBy(
+  id: string,
+  hint?: string,
+  error?: string,
+  success?: string,
+): string | undefined {
   if (error) return `${id}-error`;
+  if (success) return `${id}-success`;
   if (hint) return `${id}-hint`;
   return undefined;
 }
@@ -45,6 +54,8 @@ export function describedBy(id: string, hint?: string, error?: string): string |
 export const CONTROL_BASE =
   "rounded-md border bg-surface text-foreground transition-colors " +
   "placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-focus/30 " +
+  // 메시지를 Field가 직접 그리는 경우에도 테두리가 오류 상태를 따라오게 한다
+  "aria-invalid:border-danger aria-invalid:focus:border-danger aria-invalid:focus:ring-danger/30 " +
   "disabled:bg-surface-disabled disabled:text-muted";
 
 export const CONTROL_SIZE: Record<ControlSize, string> = {

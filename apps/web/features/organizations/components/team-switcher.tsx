@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { HiChevronDown } from "react-icons/hi2";
-import { setActiveOrg } from "@/app/org-actions";
+import Link from "next/link";
 import { PlanBadge } from "@/features/billing/components/plan-badge";
 import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { CreateTeamModal } from "@/features/organizations/components/create-team";
@@ -10,6 +10,7 @@ import { Menu, menuItemClasses } from "@/components/ui/menu";
 
 export interface TeamOption {
   id: string;
+  slug: string;
   name: string;
   paid: boolean;
   role: "owner" | "member";
@@ -32,7 +33,7 @@ export function TeamSwitcher({ teams, activeId }: { teams: TeamOption[]; activeI
             <RoleBadge role={active.role} />
             <HiChevronDown
               aria-hidden
-              className={`size-4 text-subtle transition-transform ${open ? "rotate-180" : ""}`}
+              className={`size-4 text-subtle transition-[rotate] ${open ? "rotate-180" : ""}`}
             />
           </>
         )}
@@ -40,16 +41,13 @@ export function TeamSwitcher({ teams, activeId }: { teams: TeamOption[]; activeI
         {(close) => (
           <>
             {others.map((team) => (
-              <form key={team.id} action={setActiveOrg}>
-                <input type="hidden" name="org_id" value={team.id} />
-                <button type="submit" className={menuItemClasses()}>
+              <Link key={team.id} href={`/${team.slug}/projects`} className={menuItemClasses()}>
                   <span className="flex items-center gap-2">
                     <span className="text-sm font-semibold">{team.name}</span>
                     <PlanBadge paid={team.paid} />
                     <RoleBadge role={team.role} />
                   </span>
-                </button>
-              </form>
+              </Link>
             ))}
             {others.length === 0 && (
               <p className="px-3 py-2.5 text-sm text-subtle">전환할 팀이 없습니다.</p>

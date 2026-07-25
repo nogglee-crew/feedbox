@@ -22,5 +22,5 @@ export async function requestSubscriptionNotify(formData: FormData) {
     orgId,
   });
   await setFlashToast("출시 알림 신청이 완료되었습니다");
-  revalidatePath("/projects");
+  revalidatePath(`/${ctx.org.slug}/projects`);
 }

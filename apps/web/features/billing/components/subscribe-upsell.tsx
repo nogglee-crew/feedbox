@@ -18,7 +18,7 @@ export function SubscribeUpsell({
     <Card padding="lg">
       <h2 className="font-bold">프로젝트를 더 만들려면 구독이 필요해요</h2>
       <p className="mt-1 text-sm text-muted">
-        무료 플랜에서는 조직당 프로젝트 1개까지 만들 수 있습니다. 여러 프로젝트를 관리할 수 있는{" "}
+        무료 플랜에서는 팀당 프로젝트 1개까지 만들 수 있습니다. 여러 프로젝트를 관리할 수 있는{" "}
         <b>구독 서비스를 준비 중</b>입니다.
       </p>
 
@@ -50,7 +50,16 @@ export function SubscribeUpsell({
             name="privacy_agree"
             required
             label="(필수) 개인정보 수집·이용에 동의합니다."
-            description="수집 항목: 이메일 주소 · 수집 목적: 구독 서비스 출시 알림 발송 · 보유 기간: 알림 발송 완료 또는 동의 철회 시까지. 동의를 거부할 수 있으며, 거부 시 출시 알림을 받을 수 없습니다."
+            description={
+              <>
+                <span className="block">수집 항목: 이메일 주소</span>
+                <span className="block">수집 목적: 구독 서비스 출시 알림 발송</span>
+                <span className="block">보유 기간: 알림 발송 완료 또는 동의 철회 시까지</span>
+                <span className="mt-1 block">
+                  동의를 거부할 수 있으며, 거부 시 출시 알림을 받을 수 없습니다.
+                </span>
+              </>
+            }
           />
         </form>
       )}

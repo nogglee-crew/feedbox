@@ -14,11 +14,13 @@ import { ISSUE_STATUSES, type IssueStatus, type OrgMemberProfile } from "@/lib/t
 
 export function IssueStatusSelect({
   issueId,
+  orgSlug,
   status,
   onStatusChange,
   className,
 }: {
   issueId: number;
+  orgSlug: string;
   status: IssueStatus;
   onStatusChange?: (status: IssueStatus) => void;
   className?: string;
@@ -29,7 +31,7 @@ export function IssueStatusSelect({
     const previousStatus = status;
     onStatusChange?.(nextStatus);
     startTransition(() => {
-      void updateIssueStatus(issueId, nextStatus)
+      void updateIssueStatus(orgSlug, issueId, nextStatus)
         .then(() => showToast({ message: "이슈 상태를 저장했습니다", tone: "success" }))
         .catch(() => {
           onStatusChange?.(previousStatus);
@@ -83,12 +85,14 @@ export function IssueStatusSelect({
 
 export function AssigneeControl({
   issueId,
+  orgSlug,
   assignee,
   members,
   className,
   onAssigneeChange,
 }: {
   issueId: number;
+  orgSlug: string;
   assignee: string | null;
   members: OrgMemberProfile[] | null;
   className?: string;
@@ -114,7 +118,7 @@ export function AssigneeControl({
       setSelectedAssignee(nextAssignee);
       onAssigneeChange?.(nextAssignee || null);
       startTransition(() => {
-        void updateIssueAssignee(issueId, nextAssignee)
+        void updateIssueAssignee(orgSlug, issueId, nextAssignee)
           .then(() => showToast({ message: "담당자를 저장했습니다", tone: "success" }))
           .catch(() => {
             setSelectedAssignee(previousAssignee);
@@ -218,7 +222,7 @@ export function AssigneeControl({
           const nextAssignee = value.trim();
           onAssigneeChange?.(nextAssignee || null);
           startTransition(() => {
-            void updateIssueAssignee(issueId, value)
+            void updateIssueAssignee(orgSlug, issueId, value)
               .then(() => showToast({ message: "담당자를 저장했습니다", tone: "success" }))
               .catch(() => {
                 setValue(previousAssignee);

@@ -1,21 +1,27 @@
-import { cookies } from "next/headers";
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { getUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { ACTIVE_ORG_COOKIE, assertOwner } from "@/lib/orgs";
+import { normalizeOrgSlug, validateOrgSlug } from "@/lib/org-slugs";
+import { assertOwner } from "@/lib/orgs";
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
-export async function createOrganizationForCurrentUser(name: string): Promise<void> {
+export async function createOrganizationForCurrentUser(name: string): Promise<{ slug: string }> {
   const user = await getUser();
-  if (!user?.email) redirect("/login");
+  if (!user?.email) redirect("/auth/sign-in");
 
   const email = normalizeEmail(user.email);
+  const id = randomUUID();
+  const slug = id.slice(0, 8);
   const org = await prisma.organization.create({
     data: {
+      id,
       name,
+      slug,
       members: {
         create: {
           authUserId: user.id,
@@ -26,17 +32,12 @@ export async function createOrganizationForCurrentUser(name: string): Promise<vo
     },
   });
 
-  (await cookies()).set(ACTIVE_ORG_COOKIE, org.id, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  });
+  return { slug: org.slug };
 }
 
-export async function activateOrganizationForCurrentUser(orgId: string): Promise<void> {
+export async function findOrganizationForCurrentUser(orgId: string): Promise<{ slug: string } | null> {
   const user = await getUser();
-  if (!user?.email) redirect("/login");
+  if (!user?.email) redirect("/auth/sign-in");
 
   const membership = await prisma.organizationMember.findFirst({
     where: {
@@ -46,16 +47,46 @@ export async function activateOrganizationForCurrentUser(orgId: string): Promise
         { email: normalizeEmail(user.email) },
       ],
     },
-    select: { id: true },
+    select: { org: { select: { slug: true } } },
   });
-  if (!membership) return;
+  return membership?.org ?? null;
+}
 
-  (await cookies()).set(ACTIVE_ORG_COOKIE, orgId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
+export async function resolveOrganizationAfterSignIn(input: {
+  authUserId: string;
+  email: string;
+  name: unknown;
+  avatarUrl: unknown;
+}): Promise<{ slug: string } | null> {
+  const email = normalizeEmail(input.email);
+  const membership = await prisma.organizationMember.findFirst({
+    where: {
+      OR: [{ authUserId: input.authUserId }, { email }],
+    },
+    include: { org: true },
+    orderBy: { createdAt: "asc" },
   });
+
+  if (!membership) return null;
+
+  const name = typeof input.name === "string" ? input.name : null;
+  const avatarUrl = typeof input.avatarUrl === "string" ? input.avatarUrl : null;
+  if (
+    membership.authUserId === null ||
+    membership.name !== name ||
+    membership.avatarUrl !== avatarUrl
+  ) {
+    await prisma.organizationMember.updateMany({
+      where: { OR: [{ authUserId: input.authUserId }, { email }] },
+      data: {
+        authUserId: input.authUserId,
+        name,
+        avatarUrl,
+      },
+    });
+  }
+
+  return { slug: membership.org.slug };
 }
 
 export async function renameOrganization(input: { orgId: string; name: string }): Promise<void> {
@@ -63,6 +94,50 @@ export async function renameOrganization(input: { orgId: string; name: string })
   if (!name) return;
   await assertOwner(input.orgId);
   await prisma.organization.update({ where: { id: input.orgId }, data: { name } });
+}
+
+export async function isOrganizationSlugAvailable(input: {
+  orgId: string;
+  slug: string;
+}): Promise<{ available: boolean; slug: string; error: string | null }> {
+  await assertOwner(input.orgId);
+  const slug = normalizeOrgSlug(input.slug);
+  const error = validateOrgSlug(slug);
+  if (error) return { available: false, slug, error };
+
+  const existing = await prisma.organization.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
+  return {
+    available: !existing || existing.id === input.orgId,
+    slug,
+    error: existing && existing.id !== input.orgId ? "사용중인 주소입니다" : null,
+  };
+}
+
+export async function updateOrganizationSlug(input: {
+  orgId: string;
+  slug: string;
+}): Promise<{ slug: string }> {
+  await assertOwner(input.orgId);
+  const slug = normalizeOrgSlug(input.slug);
+  const error = validateOrgSlug(slug);
+  if (error) throw new Error(error);
+
+  try {
+    const org = await prisma.organization.update({
+      where: { id: input.orgId },
+      data: { slug },
+      select: { slug: true },
+    });
+    return org;
+  } catch (error_) {
+    if (error_ instanceof Prisma.PrismaClientKnownRequestError && error_.code === "P2002") {
+      throw new Error("이미 사용 중인 팀 URL입니다");
+    }
+    throw error_;
+  }
 }
 
 export async function addOrganizationMember(input: {

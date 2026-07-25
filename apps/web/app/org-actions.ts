@@ -3,28 +3,32 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  activateOrganizationForCurrentUser,
   addOrganizationMember,
   createOrganizationForCurrentUser,
+  findOrganizationForCurrentUser,
+  isOrganizationSlugAvailable,
   removeOrganizationMember,
   renameOrganization,
+  updateOrganizationSlug,
 } from "@/features/organizations/server/use-cases";
 import { setFlashToast } from "@/lib/flash-toast";
+import { normalizeOrgSlug } from "@/lib/org-slugs";
 
 export async function createOrganization(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
-  await createOrganizationForCurrentUser(name);
+  const org = await createOrganizationForCurrentUser(name);
   await setFlashToast("팀을 생성했습니다");
-  redirect("/projects");
+  redirect(`/${org.slug}/projects`);
 }
 
 export async function setActiveOrg(formData: FormData) {
   const orgId = String(formData.get("org_id") ?? "");
   if (!orgId) return;
-  await activateOrganizationForCurrentUser(orgId);
+  const org = await findOrganizationForCurrentUser(orgId);
+  if (!org) return;
   await setFlashToast("팀을 전환했습니다");
-  redirect("/projects");
+  redirect(`/${org.slug}/projects`);
 }
 
 export async function renameOrg(formData: FormData) {
@@ -33,8 +37,22 @@ export async function renameOrg(formData: FormData) {
   if (!orgId || !name) return;
   await renameOrganization({ orgId, name });
   await setFlashToast("팀 이름을 저장했습니다");
-  revalidatePath("/settings/teams");
-  revalidatePath("/projects");
+  revalidatePath("/", "layout");
+}
+
+export async function checkOrgSlug(orgId: string, slug: string) {
+  return isOrganizationSlugAvailable({ orgId, slug });
+}
+
+export async function updateOrgSlug(formData: FormData) {
+  const orgId = String(formData.get("org_id") ?? "");
+  const currentSlug = String(formData.get("current_slug") ?? "");
+  const slug = normalizeOrgSlug(String(formData.get("slug") ?? ""));
+  if (!orgId || !slug) return;
+  const org = await updateOrganizationSlug({ orgId, slug });
+  await setFlashToast("팀 URL을 저장했습니다");
+  revalidatePath("/", "layout");
+  if (org.slug !== currentSlug) redirect(`/${org.slug}/settings/teams`);
 }
 
 export async function addOrgMember(formData: FormData) {
@@ -44,7 +62,7 @@ export async function addOrgMember(formData: FormData) {
   if (!orgId || !email || !email.includes("@")) return;
   await addOrganizationMember({ orgId, email, role });
   await setFlashToast("멤버를 추가했습니다");
-  revalidatePath("/settings/members");
+  revalidatePath("/", "layout");
 }
 
 export async function removeOrgMember(formData: FormData) {
@@ -53,5 +71,5 @@ export async function removeOrgMember(formData: FormData) {
   if (!orgId || !memberId) return;
   await removeOrganizationMember({ orgId, memberId });
   await setFlashToast("멤버를 삭제했습니다");
-  revalidatePath("/settings/members");
+  revalidatePath("/", "layout");
 }

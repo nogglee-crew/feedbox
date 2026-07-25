@@ -13,6 +13,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">
   label?: string;
   hint?: string;
   error?: string;
+  success?: string;
   size?: ControlSize;
   fieldClassName?: string;
 }
@@ -22,6 +23,7 @@ export function Input({
   label,
   hint,
   error,
+  success,
   size = "md",
   className,
   fieldClassName,
@@ -35,16 +37,23 @@ export function Input({
       id={controlId || undefined}
       name={name}
       aria-invalid={error ? true : undefined}
-      aria-describedby={describedBy(controlId, hint, error)}
+      aria-describedby={describedBy(controlId, hint, error, success)}
       className={cn(CONTROL_BASE, CONTROL_SIZE[size], controlBorder(!!error), className)}
       {...props}
     />
   );
 
-  if (!label && !hint && !error) return control;
+  if (!label && !hint && !error && !success) return control;
 
   return (
-    <Field id={controlId} label={label} hint={hint} error={error} className={fieldClassName}>
+    <Field
+      id={controlId}
+      label={label}
+      hint={hint}
+      error={error}
+      success={success}
+      className={fieldClassName}
+    >
       {control}
     </Field>
   );

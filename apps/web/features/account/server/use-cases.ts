@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 /** Deletes single-member organizations and blocks sole owners from leaving shared organizations. */
 export async function deleteCurrentAccount(): Promise<void> {
   const user = await getUser();
-  if (!user?.email) redirect("/login");
+  if (!user?.email) redirect("/auth/sign-in");
 
   const email = user.email.toLowerCase();
   const memberships = await prisma.organizationMember.findMany({

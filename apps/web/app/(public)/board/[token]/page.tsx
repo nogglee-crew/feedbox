@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MadeByBadge } from "@/components/made-by-badge";
 import { Tag } from "@/components/ui/badge";
 import { AnchorButton } from "@/components/ui/button";
 import { IssueBoard } from "@/features/issues/components/issue-board";
@@ -16,6 +18,37 @@ function qaUrl(baseUrl: string | null, token: string): string | null {
   if (!baseUrl) return null;
   const target = baseUrl.replace(/#.*$/, "");
   return `${target}#session=${encodeURIComponent(token)}`;
+}
+
+/** 고객사에 링크로 전달되는 화면이라 미리보기는 갖추되, 이슈 내용이 색인되면 안 된다 */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const session = await getSessionByToken(token);
+  const noIndex = { robots: { index: false, follow: false } };
+  if (!session) return { title: "이슈 보드", ...noIndex };
+
+  const [project, release, issues] = await Promise.all([
+    getProject(session.project_id),
+    getRelease(session.release_id),
+    listIssues(session.release_id, { sessionId: session.id }),
+  ]);
+  if (!project || !release) return { title: "이슈 보드", ...noIndex };
+
+  const resolved = issues.filter((i) => i.status === "DONE" || i.status === "CLOSED").length;
+  const title = `${project.name} ${release.version} 이슈 보드`;
+  const description = `전체 ${issues.length}건 중 ${resolved}건 처리 완료`;
+
+  return {
+    title,
+    description,
+    ...noIndex,
+    openGraph: { title, description, type: "website" },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function BoardPage({ params }: { params: Promise<{ token: string }> }) {
@@ -48,7 +81,7 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
   const feedbackUrl = qaUrl(project.base_url, session.token);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-16">
       <header className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">
@@ -77,6 +110,8 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
       </header>
 
       <IssueBoard issues={boardIssues} token={session.token} />
+
+      <MadeByBadge />
     </div>
   );
 }

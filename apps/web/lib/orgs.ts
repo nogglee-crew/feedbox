@@ -1,11 +1,8 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { getUser, isAuthEnabled } from "./auth";
 import { prisma } from "./db";
 import type { Organization, OrgMember, OrgRole } from "./types";
-
-export const ACTIVE_ORG_COOKIE = "feedbox-active-org";
 
 export interface OrgMembershipSummary {
   org: Organization;
@@ -22,6 +19,7 @@ export interface OrgContext {
 
 function mapOrganization(row: {
   id: string;
+  slug: string;
   name: string;
   plan: "FREE" | "PRO";
   billingStatus: "UNPAID" | "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED";
@@ -30,6 +28,7 @@ function mapOrganization(row: {
 }): Organization {
   return {
     id: row.id,
+    slug: row.slug,
     name: row.name,
     plan: row.plan,
     billing_status: row.billingStatus,
@@ -51,10 +50,10 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
     throw new Error("Supabase Auth environment variables are required");
   }
   const user = await getUser();
-  if (!user?.email) redirect("/login");
+  if (!user?.email) redirect("/auth/sign-in");
 
   const email = user.email.toLowerCase();
-  if (!isDashboardEmailAllowed(email)) redirect("/login?denied=1");
+  if (!isDashboardEmailAllowed(email)) redirect("/?denied=1");
 
   const rows = await prisma.organizationMember.findMany({
     where: {
@@ -76,8 +75,7 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
     });
   }
 
-  const activeId = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;
-  const active = rows.find((row) => row.orgId === activeId) ?? rows[0];
+  const active = rows[0];
   return {
     org: mapOrganization(active.org),
     role: active.role === "OWNER" ? "owner" : "member",
@@ -93,6 +91,59 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
 export async function requireOrg(): Promise<OrgContext> {
   const ctx = await loadOrgContext();
   if (ctx === "no-org") redirect("/onboarding");
+  return ctx;
+}
+
+export const loadOrgContextBySlug = cache(async function loadOrgContextBySlug(
+  orgSlug: string,
+): Promise<OrgContext | "no-org" | "not-member"> {
+  if (!isAuthEnabled()) {
+    throw new Error("Supabase Auth environment variables are required");
+  }
+  const user = await getUser();
+  if (!user?.email) redirect("/auth/sign-in");
+
+  const email = user.email.toLowerCase();
+  if (!isDashboardEmailAllowed(email)) redirect("/?denied=1");
+
+  const rows = await prisma.organizationMember.findMany({
+    where: {
+      OR: [{ authUserId: user.id }, { email }],
+    },
+    include: { org: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (rows.length === 0) return "no-org";
+
+  const needsSync = rows.some(
+    (row) => row.authUserId === null || row.name !== user.name || row.avatarUrl !== user.avatarUrl,
+  );
+  if (needsSync) {
+    await prisma.organizationMember.updateMany({
+      where: { OR: [{ authUserId: user.id }, { email }] },
+      data: { authUserId: user.id, name: user.name, avatarUrl: user.avatarUrl },
+    });
+  }
+
+  const active = rows.find((row) => row.org.slug === orgSlug);
+  if (!active) return "not-member";
+
+  return {
+    org: mapOrganization(active.org),
+    role: active.role === "OWNER" ? "owner" : "member",
+    orgs: rows.map((row) => mapOrganization(row.org)),
+    memberships: rows.map((row) => ({
+      org: mapOrganization(row.org),
+      role: row.role === "OWNER" ? ("owner" as const) : ("member" as const),
+    })),
+    email,
+  };
+});
+
+export async function requireOrgBySlug(orgSlug: string): Promise<OrgContext> {
+  const ctx = await loadOrgContextBySlug(orgSlug);
+  if (ctx === "no-org") redirect("/onboarding");
+  if (ctx === "not-member") redirect("/projects");
   return ctx;
 }
 
@@ -115,7 +166,7 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
 
 export async function assertOwner(orgId: string): Promise<string> {
   const user = await getUser();
-  if (!user?.email) redirect("/login");
+  if (!user?.email) redirect("/auth/sign-in");
   const email = user.email.toLowerCase();
   const membership = await prisma.organizationMember.findFirst({
     where: {

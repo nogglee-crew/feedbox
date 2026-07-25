@@ -1,5 +1,6 @@
 export interface Organization {
   id: string;
+  slug: string;
   name: string;
   created_at: string;
   plan: "FREE" | "PRO";

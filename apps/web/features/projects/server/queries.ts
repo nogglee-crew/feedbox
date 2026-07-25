@@ -125,6 +125,51 @@ export async function listProjectsForOrg(orgId: string): Promise<Project[]> {
   return rows.map(mapProject);
 }
 
+export interface ProjectListItem extends Project {
+  /** 아직 처리되지 않은 이슈 수 (접수됨 + 처리 중) */
+  open_issue_count: number;
+  /** 가장 최근에 만든 릴리즈 버전. 없으면 null */
+  latest_release_version: string | null;
+}
+
+/** 프로젝트 수와 무관하게 쿼리 3번으로 끝낸다 */
+export async function listProjectsWithActivity(orgId: string): Promise<ProjectListItem[]> {
+  const rows = await prisma.project.findMany({
+    where: { orgId },
+    orderBy: { createdAt: "desc" },
+  });
+  if (rows.length === 0) return [];
+
+  const projectIds = rows.map((row) => row.id);
+  const [issueCounts, releases] = await Promise.all([
+    prisma.issue.groupBy({
+      by: ["projectId"],
+      where: { projectId: { in: projectIds }, status: { in: ["OPEN", "IN_PROGRESS"] } },
+      _count: { _all: true },
+    }),
+    prisma.release.findMany({
+      where: { projectId: { in: projectIds } },
+      select: { projectId: true, version: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const countByProject = new Map(issueCounts.map((row) => [row.projectId, row._count._all]));
+  // 최신순이라 먼저 담긴 값이 가장 최근 릴리즈다
+  const releaseByProject = new Map<string, string>();
+  for (const release of releases) {
+    if (!releaseByProject.has(release.projectId)) {
+      releaseByProject.set(release.projectId, release.version);
+    }
+  }
+
+  return rows.map((row) => ({
+    ...mapProject(row),
+    open_issue_count: countByProject.get(row.id) ?? 0,
+    latest_release_version: releaseByProject.get(row.id) ?? null,
+  }));
+}
+
 export async function getProject(id: string): Promise<Project | null> {
   const row = await prisma.project.findUnique({ where: { id } });
   return row ? mapProject(row) : null;

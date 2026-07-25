@@ -19,6 +19,7 @@ import type { Issue, OrgMemberProfile } from "@/lib/types";
 
 export function IssueCard({
   issue,
+  orgSlug,
   members,
   readOnly = false,
   screenshotMaxHeight = "md",
@@ -29,6 +30,7 @@ export function IssueCard({
   showMeta = true,
 }: {
   issue: Issue;
+  orgSlug?: string;
   members?: OrgMemberProfile[] | null;
   readOnly?: boolean;
   screenshotMaxHeight?: "sm" | "md";
@@ -148,6 +150,7 @@ export function IssueCard({
                 <div className="w-28 shrink-0">
                   <IssueStatusSelect
                     issueId={issue.id}
+                    orgSlug={orgSlug ?? ""}
                     status={status}
                     onStatusChange={setStatus}
                     className="w-full"
@@ -156,6 +159,7 @@ export function IssueCard({
                 <div className="min-w-0 flex-1">
                   <AssigneeControl
                     issueId={issue.id}
+                    orgSlug={orgSlug ?? ""}
                     assignee={assignee}
                     members={members ?? null}
                     onAssigneeChange={setAssignee}
