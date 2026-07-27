@@ -9,6 +9,7 @@ const DISALLOW = [
   "/api/",
   "/board/",
   "/auth/",
+  "/admin",
   "/onboarding",
   "/*/projects",
   "/*/settings",

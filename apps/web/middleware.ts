@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   /^\/auth\/sign-in/,
   /^\/auth\//,
   /^\/api\/sdk\//,
+  // 랜딩과 공개 보드에서도 계측을 보낸다. 인증을 요구하면 비로그인 이벤트가 전부 유실된다
+  /^\/api\/events$/,
   /^\/demo/,
   /^\/board\//,
   /^\/terms/,

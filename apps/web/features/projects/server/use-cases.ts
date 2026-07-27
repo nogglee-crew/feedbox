@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { recordServerEvent } from "@/features/analytics/server/record-event";
 import { projectLimit } from "@/features/billing/domain/entitlements";
 import { deleteProjectScreenshots } from "@/features/issues/server/sdk-issues";
 import { prisma } from "@/lib/db";
@@ -56,6 +57,8 @@ export async function createProjectForCurrentOrg(input: {
     },
     { isolationLevel: "Serializable" },
   );
+
+  await recordServerEvent("project_create", ctx.org.id);
 }
 
 export async function deleteProjectForCurrentOrg(
@@ -89,8 +92,9 @@ export async function createReleaseForCurrentOrg(
   projectId: string,
   version: string,
 ): Promise<void> {
-  await requireProject(orgSlug, projectId);
+  const { ctx } = await requireProject(orgSlug, projectId);
   await prisma.release.create({ data: { projectId, version } });
+  await recordServerEvent("release_create", ctx.org.id);
 }
 
 export async function setReleaseStatusForCurrentOrg(input: {
@@ -128,7 +132,7 @@ export async function createSessionForCurrentOrg(input: {
   createdBy: string | null;
   expiresAt: Date;
 }): Promise<void> {
-  await requireProject(input.orgSlug, input.projectId);
+  const { ctx } = await requireProject(input.orgSlug, input.projectId);
   const release = await prisma.release.findFirst({
     where: { id: input.releaseId, projectId: input.projectId },
     select: { id: true, status: true },
@@ -145,6 +149,7 @@ export async function createSessionForCurrentOrg(input: {
       token: randomBytes(24).toString("base64url"),
     },
   });
+  await recordServerEvent("qa_session_create", ctx.org.id);
 }
 
 export async function revokeSessionForCurrentOrg(input: {

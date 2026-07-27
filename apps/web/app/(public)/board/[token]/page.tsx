@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { OG_IMAGES, TWITTER_IMAGES } from "@/lib/site-metadata";
 import { notFound } from "next/navigation";
 import { MadeByBadge } from "@/components/made-by-badge";
+import { BoardViewTracker } from "@/features/analytics/components/board-view-tracker";
 import { Tag } from "@/components/ui/badge";
 import { AnchorButton } from "@/components/ui/button";
 import { IssueBoard } from "@/features/issues/components/issue-board";
@@ -112,6 +113,7 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
       />
 
       <MadeByBadge />
+      <BoardViewTracker />
     </div>
   );
 }
