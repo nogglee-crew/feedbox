@@ -26,6 +26,43 @@ let installCount = 0;
 let teardownCapture: (() => void) | null = null;
 let nativeFetch: typeof fetch | null = null;
 
+/**
+ * 계측·모니터링 전용 호스트.
+ * 테스터가 보고하려는 결함과 무관한데, 애드블록이 이 요청을 끊으면
+ * 진단 패널이 남의 도메인 URL로 채워져 정작 필요한 에러를 가린다.
+ */
+const TELEMETRY_HOSTS = [
+  "google-analytics.com",
+  "analytics.google.com",
+  "googletagmanager.com",
+  "doubleclick.net",
+  "connect.facebook.net",
+  "sentry.io",
+  "amplitude.com",
+  "mixpanel.com",
+  "segment.io",
+  "segment.com",
+  "hotjar.com",
+  "clarity.ms",
+  "posthog.com",
+  "datadoghq.com",
+  "nr-data.net",
+  "fullstory.com",
+  "logrocket.io",
+  "intercom.io",
+];
+
+function isTelemetryRequest(url: string): boolean {
+  try {
+    const { hostname } = new URL(url, window.location.href);
+    return TELEMETRY_HOSTS.some(
+      (host) => hostname === host || hostname.endsWith(`.${host}`),
+    );
+  } catch {
+    return false;
+  }
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null
     ? (value as Record<string, unknown>)
@@ -126,6 +163,7 @@ function recordHttpFailure(
   url: string,
   status: number,
 ) {
+  if (isTelemetryRequest(url)) return;
   const request = normalizeRequest({ method, url, status });
   recordDiagnostics(
     {
@@ -143,6 +181,7 @@ function recordNetworkFailure(
   method: string,
   url: string,
 ) {
+  if (isTelemetryRequest(url)) return;
   const request = normalizeRequest({ method, url, status: null });
   recordDiagnostics(
     normalizeError(error, {
@@ -228,7 +267,9 @@ function installCapture(): () => void {
     const request = requestDetails(input, init);
     try {
       const response = await nativeFetch!(input, init);
-      if (!response.ok) {
+      // no-cors 요청의 opaque 응답은 스펙상 status가 항상 0이고 ok가 false다.
+      // 성공 여부를 알 수 없으므로 실패로 단정하지 않는다.
+      if (!response.ok && response.type !== "opaque") {
         recordHttpFailure(request.method, request.url, response.status);
       }
       return response;
