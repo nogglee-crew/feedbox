@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { recordServerEvent } from "@/features/analytics/server/record-event";
 import { getUser } from "@/lib/auth";
 import { deleteProjectScreenshots } from "@/features/issues/server/sdk-issues";
 import { prisma } from "@/lib/db";
@@ -33,6 +34,7 @@ export async function createOrganizationForCurrentUser(name: string): Promise<{ 
     },
   });
 
+  await recordServerEvent("org_create", org.id);
   return { slug: org.slug };
 }
 
