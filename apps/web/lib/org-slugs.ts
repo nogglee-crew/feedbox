@@ -1,6 +1,7 @@
 export const ORG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const RESERVED_ORG_SLUGS = new Set([
+  "admin",
   "api",
   "auth",
   "board",

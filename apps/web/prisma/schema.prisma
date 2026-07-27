@@ -174,3 +174,24 @@ model SubscriptionInterest {
 
   @@map("subscription_interests")
 }
+
+/// 제품 내부 행동 계측. orgId/authUserId는 관계를 걸지 않는다.
+/// 조직이나 회원이 삭제돼도 이탈 분석에 필요한 이력이 남아야 한다.
+model AnalyticsEvent {
+  id         BigInt   @id @default(autoincrement())
+  name       String
+  anonId     String   @map("anon_id")
+  sessionId  String   @map("session_id")
+  authUserId String?  @map("auth_user_id") @db.Uuid
+  orgId      String?  @map("org_id") @db.Uuid
+  path       String?
+  referrer   String?
+  country    String?
+  params     Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([name, createdAt])
+  @@index([orgId, createdAt])
+  @@index([authUserId, createdAt])
+  @@map("analytics_events")
+}
