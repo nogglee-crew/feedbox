@@ -34,5 +34,10 @@ jobs:
           fi
       - run: pnpm --filter @nogglee/feedbox typecheck
       - run: pnpm --filter @nogglee/feedbox build
+      # setup-node가 만든 .npmrc가 ${NODE_AUTH_TOKEN}을 참조한다.
+      # 이 값을 주지 않으면 비인증 요청이 되고, npm은 스코프 패키지에 대해
+      # 권한 없음을 존재 여부가 드러나지 않도록 404로 응답한다.
       - run: npm publish
         working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
