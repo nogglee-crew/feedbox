@@ -1,6 +1,7 @@
 import { Tag } from "@/components/ui/badge";
 import { DataTable } from "@/features/analytics/components/data-table";
-import { formatDate, formatSince } from "@/features/analytics/components/format";
+import { LocalTime } from "@/components/ui/local-time";
+import { formatSince } from "@/lib/datetime";
 import {
   listMembershipActivity,
   listSignups,
@@ -92,7 +93,7 @@ export default async function AdminUsersPage() {
           },
           {
             header: "가입일",
-            cell: (user) => <span className="text-muted">{formatDate(user.createdAt)}</span>,
+            cell: (user) => <LocalTime value={user.createdAt} style="shortDate" className="text-muted" />,
           },
           {
             header: "최근 로그인",

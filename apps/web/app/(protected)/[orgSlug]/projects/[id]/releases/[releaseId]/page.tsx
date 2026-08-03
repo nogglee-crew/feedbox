@@ -3,9 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revokeQaSession } from "@/app/actions";
 import { CopyButton } from "@/components/ui/copy-button";
+import { LocalTime } from "@/components/ui/local-time";
 import { DashboardIssueList } from "@/features/issues/components/dashboard-issue-list";
 import { IssueFilters } from "@/features/issues/components/issue-filters";
-import { toDashboardItem } from "@/features/issues/server/issue-items";
 import { CreateQaSessionButton } from "@/features/projects/components/create-qa-session-button";
 import { QaSessionAccessToggle } from "@/features/projects/components/qa-session-access-toggle";
 import { StatusBadge } from "@/components/ui/badge";
@@ -73,7 +73,6 @@ export default async function ReleasePage({
     listSessions(releaseId),
   ]);
   const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + issueCount[s], 0);
-  const initialItems = issuePage.issues.map(toDashboardItem);
 
   const now = Date.now();
 
@@ -130,7 +129,7 @@ export default async function ReleasePage({
                 </span>
                 <span className="ml-auto text-xs text-subtle">
                   {s.created_by && `${s.created_by} · `}
-                  {new Date(s.expires_at).toLocaleDateString("ko-KR")} 만료
+                  <LocalTime value={s.expires_at} style="date" /> 만료
                 </span>
                 {active && (
                   <form action={revokeQaSession}>
@@ -166,7 +165,7 @@ export default async function ReleasePage({
           status={statusFilter ?? ""}
           q={q ?? ""}
           members={members}
-          initialItems={initialItems}
+          initialItems={issuePage.issues}
           initialCursor={issuePage.nextCursor}
         />
       </section>

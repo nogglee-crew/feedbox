@@ -1,6 +1,6 @@
 import { Tag, type Tone } from "@/components/ui/badge";
 import { DataTable } from "@/features/analytics/components/data-table";
-import { formatDateTime } from "@/features/analytics/components/format";
+import { LocalTime } from "@/components/ui/local-time";
 import { listRecentIssues } from "@/features/analytics/server/admin-queries";
 
 const ISSUE_LIMIT = 200;
@@ -50,7 +50,11 @@ export default async function AdminIssuesPage() {
           {
             header: "접수",
             cell: (issue) => (
-              <span className="whitespace-nowrap text-muted">{formatDateTime(issue.createdAt)}</span>
+              <LocalTime
+                value={issue.createdAt}
+                style="shortDateTime"
+                className="whitespace-nowrap text-muted"
+              />
             ),
           },
         ]}
