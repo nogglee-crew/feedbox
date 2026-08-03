@@ -116,6 +116,12 @@ blanked by the browser; the issue is still created without the screenshot.
 React 18 or later, and evergreen browsers — the overlay relies on the native `<dialog>`
 element and the Clipboard API.
 
+## Changelog
+
+See [CHANGELOG.md](https://github.com/nogglee-crew/feedbox/blob/main/packages/sdk/CHANGELOG.md)
+for release notes, or browse the
+[GitHub releases](https://github.com/nogglee-crew/feedbox/releases).
+
 ## License
 
 The `@nogglee/feedbox` SDK is available under the [MIT License](LICENSE), so installing it

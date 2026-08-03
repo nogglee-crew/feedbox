@@ -62,7 +62,7 @@ export function App() {
 ```
 
 `projectKey`와 `apiKey`는 대시보드의 **프로젝트 → SDK 설치 정보**에서 복사합니다.
-셀프 호스팅이 아니라면 그게 전부입니다 — 서버 주소(`apiBaseUrl`)는 기본값으로 들어갑니다.
+셀프 호스팅이 아니라면 그게 전부입니다. 서버 주소(`apiBaseUrl`)는 기본값으로 들어갑니다.
 
 SDK 전체 레퍼런스와 문제 해결은 [`packages/sdk/README.md`](packages/sdk/README.md)에 있습니다.
 
@@ -88,6 +88,11 @@ SDK 전체 레퍼런스와 문제 해결은 [`packages/sdk/README.md`](packages/
 
 플랫폼을 직접 띄우거나 기여하려면 [`CONTRIBUTING.md`](CONTRIBUTING.md)를 보세요.
 기여 방법, 구조, 로컬 설정, 작업 규칙, 배포 절차가 정리돼 있습니다.
+
+## 변경 이력
+
+웹 앱은 [`CHANGELOG.md`](CHANGELOG.md), SDK는
+[`packages/sdk/CHANGELOG.md`](packages/sdk/CHANGELOG.md)에 정리돼 있습니다.
 
 ## License
 

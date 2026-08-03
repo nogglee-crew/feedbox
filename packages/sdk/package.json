@@ -1,6 +1,6 @@
 {
   "name": "@nogglee/feedbox",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "FEEDBOX 웹 피드백 수집 React SDK",
   "license": "MIT",
   "repository": {
