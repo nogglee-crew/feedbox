@@ -1,6 +1,7 @@
 import { Tag } from "@/components/ui/badge";
 import { DataTable } from "@/features/analytics/components/data-table";
-import { formatDate, formatSince } from "@/features/analytics/components/format";
+import { LocalTime } from "@/components/ui/local-time";
+import { formatSince } from "@/lib/datetime";
 import { listProjects } from "@/features/analytics/server/admin-queries";
 
 export default async function AdminProjectsPage() {
@@ -75,7 +76,7 @@ export default async function AdminProjectsPage() {
           {
             header: "생성일",
             secondary: true,
-            cell: (project) => <span className="text-muted">{formatDate(project.createdAt)}</span>,
+            cell: (project) => <LocalTime value={project.createdAt} style="shortDate" className="text-muted" />,
           },
         ]}
       />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
+import { LocalTime } from "@/components/ui/local-time";
 import { AssigneeControl, IssueStatusSelect } from "@/features/issues/components/issue-controls";
 import { IssueCopyButton } from "@/features/issues/components/issue-copy-button";
 import { IssueCancelButton } from "@/features/issues/components/issue-cancel-button";
@@ -23,9 +24,6 @@ export function IssueCard({
   members,
   readOnly = false,
   screenshotMaxHeight = "md",
-  createdAtLabel,
-  createdDateLabel,
-  createdTimeLabel,
   customerConfirmToken,
   showMeta = true,
 }: {
@@ -34,9 +32,6 @@ export function IssueCard({
   members?: OrgMemberProfile[] | null;
   readOnly?: boolean;
   screenshotMaxHeight?: "sm" | "md";
-  createdAtLabel: string;
-  createdDateLabel?: string;
-  createdTimeLabel?: string;
   customerConfirmToken?: string;
   showMeta?: boolean;
 }) {
@@ -44,7 +39,6 @@ export function IssueCard({
   const [assignee, setAssignee] = useState(issue.assignee);
   const [editing, setEditing] = useState(false);
   const compactReadOnly = readOnly && !showMeta;
-  const compactDateLabel = `${createdDateLabel ?? createdAtLabel}${createdTimeLabel ? ` ${createdTimeLabel}` : ""}`;
   // 처리가 끝난 이슈는 기록으로 고정한다. 서버 유스케이스에서도 같은 조건으로 막는다
   const customerEditable = status === "OPEN" || status === "IN_PROGRESS";
   // 종료된 건은 할 수 있는 동작이 없으므로 비활성 버튼을 남기지 않고 아예 감춘다
@@ -67,7 +61,7 @@ export function IssueCard({
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="font-bold">#{issue.id}</span>
               <IssueStatusBadge status={status} label={ISSUE_STATUS_LABEL[status]} />
-              {!hasSideColumn && <span className="text-xs text-subtle">{compactDateLabel}</span>}
+              {!hasSideColumn && <LocalTime value={issue.created_at} className="text-xs text-subtle" />}
             </div>
             {customerConfirmToken ? (
               <IssueMemoEditor
@@ -118,7 +112,7 @@ export function IssueCard({
                   fill
                 />
               )}
-              <span className="text-right text-xs text-subtle">{compactDateLabel}</span>
+              <LocalTime value={issue.created_at} className="text-right text-xs text-subtle" />
             </div>
           )}
         </div>
@@ -138,7 +132,7 @@ export function IssueCard({
           <div className="flex items-center gap-2">
             <span className="font-bold">#{issue.id}</span>
             {readOnly && <IssueStatusBadge status={status} label={ISSUE_STATUS_LABEL[status]} />}
-            {!hasSideColumn && <span className="truncate text-xs text-subtle">{createdAtLabel}</span>}
+            {!hasSideColumn && <LocalTime value={issue.created_at} className="truncate text-xs text-subtle" />}
           </div>
           <p className="mt-2 whitespace-pre-wrap text-sm">{issue.memo}</p>
           {showMeta && <IssueMeta issue={issue} />}
@@ -177,7 +171,7 @@ export function IssueCard({
                 fill
               />
             )}
-            <span className="text-right text-xs text-subtle">{createdAtLabel}</span>
+            <LocalTime value={issue.created_at} className="text-right text-xs text-subtle" />
           </div>
         )}
       </div>

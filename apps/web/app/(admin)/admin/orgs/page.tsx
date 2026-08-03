@@ -1,6 +1,7 @@
 import { Tag } from "@/components/ui/badge";
 import { DataTable } from "@/features/analytics/components/data-table";
-import { formatDate, formatSince } from "@/features/analytics/components/format";
+import { LocalTime } from "@/components/ui/local-time";
+import { formatSince } from "@/lib/datetime";
 import { listOrgs } from "@/features/analytics/server/admin-queries";
 
 export default async function AdminOrgsPage() {
@@ -65,7 +66,7 @@ export default async function AdminOrgsPage() {
           {
             header: "생성일",
             secondary: true,
-            cell: (org) => <span className="text-muted">{formatDate(org.createdAt)}</span>,
+            cell: (org) => <LocalTime value={org.createdAt} style="shortDate" className="text-muted" />,
           },
         ]}
       />

@@ -8,8 +8,7 @@ import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IssueCard } from "@/features/issues/components/issue-card";
 import { ISSUE_STATUS_LABEL, ISSUE_STATUS_TONE } from "@/features/issues/components/issue-status";
-import type { BoardIssueItem } from "@/features/issues/server/issue-items";
-import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
+import { ISSUE_STATUSES, type Issue, type IssueStatus } from "@/lib/types";
 
 export function IssueBoard({
   token,
@@ -19,7 +18,7 @@ export function IssueBoard({
 }: {
   token: string;
   counts: Record<IssueStatus, number>;
-  initialItems: BoardIssueItem[];
+  initialItems: Issue[];
   initialCursor: number | null;
 }) {
   const [status, setStatus] = useState<IssueStatus | null>(null);
@@ -105,15 +104,12 @@ export function IssueBoard({
       </div>
 
       <ul className="space-y-3">
-        {items.map(({ issue, createdAtLabel, createdDateLabel, createdTimeLabel }) => (
+        {items.map((issue) => (
           <IssueCard
             key={issue.id}
             issue={issue}
             readOnly
             screenshotMaxHeight="sm"
-            createdAtLabel={createdAtLabel}
-            createdDateLabel={createdDateLabel}
-            createdTimeLabel={createdTimeLabel}
             customerConfirmToken={token}
             showMeta={false}
           />

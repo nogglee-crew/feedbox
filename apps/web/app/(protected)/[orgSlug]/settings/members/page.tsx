@@ -5,6 +5,7 @@ import { RoleBadge } from "@/features/organizations/components/role-badge";
 import { cardClasses } from "@/components/ui/card";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { listOrgMembers, requireOrgBySlug } from "@/lib/orgs";
+import { LocalTime } from "@/components/ui/local-time";
 
 export const metadata = { title: "멤버 관리" };
 
@@ -78,7 +79,7 @@ export default async function MembersPage({
                   {m.user_id ? "가입됨" : "초대됨 (미로그인)"}
                 </td>
                 <td className="px-5 py-3 text-xs text-muted">
-                  {new Date(m.created_at).toLocaleDateString("ko-KR")}
+                  <LocalTime value={m.created_at} style="date" />
                 </td>
                 {isOwner && (
                   <td className="px-5 py-3 text-right">

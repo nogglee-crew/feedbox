@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { OG_IMAGES, TWITTER_IMAGES } from "@/lib/site-metadata";
 import { notFound } from "next/navigation";
 import { MadeByBadge } from "@/components/made-by-badge";
+import { LocalTime } from "@/components/ui/local-time";
 import { BoardViewTracker } from "@/features/analytics/components/board-view-tracker";
 import { Tag } from "@/components/ui/badge";
 import { AnchorButton } from "@/components/ui/button";
 import { IssueBoard } from "@/features/issues/components/issue-board";
-import { toBoardItem } from "@/features/issues/server/issue-items";
 import {
   countIssuesByStatus,
   getProject,
@@ -72,8 +72,6 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
 
   const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + counts[s], 0);
   const resolved = counts.DONE + counts.CLOSED;
-  const sessionExpiresAt = new Date(session.expires_at).toLocaleDateString("ko-KR");
-  const boardIssues = issuePage.issues.map(toBoardItem);
   const feedbackUrl = qaUrl(project.base_url, session.token);
 
   return (
@@ -99,7 +97,9 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
             <p className="text-muted">
               전체 {totalIssues}건 중 <b className="text-foreground">{resolved}건</b> 처리 완료
             </p>
-            <p className="text-xs text-subtle">{sessionExpiresAt} 만료</p>
+            <p className="text-xs text-subtle">
+              <LocalTime value={session.expires_at} style="date" /> 만료
+            </p>
           </div>
           <hr className="border-border" />
         </div>
@@ -108,7 +108,7 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
       <IssueBoard
         token={session.token}
         counts={counts}
-        initialItems={boardIssues}
+        initialItems={issuePage.issues}
         initialCursor={issuePage.nextCursor}
       />
 
