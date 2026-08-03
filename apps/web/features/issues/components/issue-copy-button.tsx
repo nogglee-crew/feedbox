@@ -21,6 +21,8 @@ function issueClipboardJson({
     {
       schema: "feedbox.issue.v1",
       id: issue.id,
+      // 사람이 화면에서 보는 번호. id는 내부 참조용이라 대화에서 쓰이지 않는다
+      number: issue.number,
       project_id: issue.project_id,
       release_id: issue.release_id,
       session_id: issue.session_id,

@@ -99,6 +99,7 @@ function mapSession(row: {
 
 function mapIssue(row: {
   id: number;
+  number: number;
   projectId: string;
   releaseId: string;
   sessionId: string | null;
@@ -123,6 +124,7 @@ function mapIssue(row: {
 }): Issue {
   return {
     id: row.id,
+    number: row.number,
     project_id: row.projectId,
     release_id: row.releaseId,
     session_id: row.sessionId,

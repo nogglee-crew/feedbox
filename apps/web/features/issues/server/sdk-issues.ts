@@ -35,29 +35,42 @@ export async function countRecentSessionIssues(
   });
 }
 
-export async function createSdkIssue(input: NewSdkIssue): Promise<{ id: number }> {
-  return prisma.issue.create({
-    data: {
-      projectId: input.project_id,
-      releaseId: input.release_id,
-      sessionId: input.session_id,
-      pageUrl: input.page_url,
-      selector: input.selector,
-      elementText: input.element_text,
-      viewportWidth: input.viewport_width,
-      viewportHeight: input.viewport_height,
-      browser: input.browser,
-      errorName: input.error_name,
-      errorCode: input.error_code,
-      errorMessage: input.error_message,
-      errorStack: input.error_stack,
-      apiMethod: input.api_method,
-      apiUrl: input.api_url,
-      apiStatus: input.api_status,
-      memo: input.memo,
-      screenshotUrl: input.screenshot_url,
-    },
-    select: { id: true },
+export async function createSdkIssue(input: NewSdkIssue): Promise<{ id: number; number: number }> {
+  return prisma.$transaction(async (tx) => {
+    // 채번기를 원자적으로 올려 번호를 받는다. UPDATE가 프로젝트 행을 잠그므로
+    // 여러 테스터가 동시에 등록해도 같은 번호가 두 번 나오지 않는다.
+    const [project] = await tx.$queryRaw<{ issueSeq: number }[]>`
+      UPDATE projects
+      SET issue_seq = issue_seq + 1
+      WHERE id = ${input.project_id}::uuid
+      RETURNING issue_seq AS "issueSeq"
+    `;
+    if (!project) throw new Error("프로젝트를 찾을 수 없습니다");
+
+    return tx.issue.create({
+      data: {
+        number: project.issueSeq,
+        projectId: input.project_id,
+        releaseId: input.release_id,
+        sessionId: input.session_id,
+        pageUrl: input.page_url,
+        selector: input.selector,
+        elementText: input.element_text,
+        viewportWidth: input.viewport_width,
+        viewportHeight: input.viewport_height,
+        browser: input.browser,
+        errorName: input.error_name,
+        errorCode: input.error_code,
+        errorMessage: input.error_message,
+        errorStack: input.error_stack,
+        apiMethod: input.api_method,
+        apiUrl: input.api_url,
+        apiStatus: input.api_status,
+        memo: input.memo,
+        screenshotUrl: input.screenshot_url,
+      },
+      select: { id: true, number: true },
+    });
   });
 }
 
