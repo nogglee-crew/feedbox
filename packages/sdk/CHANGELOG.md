@@ -3,6 +3,19 @@
 이 패키지의 주요 변경 사항을 기록합니다.
 버전은 [유의적 버전](https://semver.org/lang/ko/)을 따릅니다.
 
+## [0.1.3] - 2026-08-03
+
+### 문서
+
+- README에 변경 이력 링크 추가. npm 패키지 페이지는 README만 렌더하므로 CHANGELOG를
+  패키지에 넣어도 링크가 없으면 사실상 찾을 수 없다
+- 0.1.2까지의 변경 이력이 이 릴리스부터 패키지에 함께 배포된다
+
+### 내부
+
+- 버전이 오른 채로 main에 머지되면 자동 배포하도록 릴리스 워크플로를 바꿨다.
+  태그 푸시로 직접 배포하는 방법도 그대로 쓸 수 있다
+
 ## [0.1.2] - 2026-08-03
 
 ### 수정
@@ -52,12 +65,13 @@
 
 최초 릴리스.
 
-- `FeedboxProvider` — QA 세션(`#session=<token>`)을 감지해 피드백 모드를 켭니다
+- `FeedboxProvider` - QA 세션(`#session=<token>`)을 감지해 피드백 모드를 켭니다
 - 요소 선택 → 메모 작성 → 스크린샷 첨부로 이슈 등록
 - 에러·네트워크 실패 자동 수집 후 이슈에 진단 정보로 첨부
-- `captureFeedboxError` — 앱에서 직접 에러를 전달하는 API
+- `captureFeedboxError` - 앱에서 직접 에러를 전달하는 API
 - 셀프 호스팅 지원 (`apiBaseUrl`)
 
+[0.1.3]: https://github.com/nogglee-crew/feedbox/releases/tag/sdk-v0.1.3
 [0.1.2]: https://github.com/nogglee-crew/feedbox/releases/tag/sdk-v0.1.2
 [0.1.1]: https://github.com/nogglee-crew/feedbox/releases/tag/sdk-v0.1.1
 [0.1.0]: https://www.npmjs.com/package/@nogglee/feedbox/v/0.1.0

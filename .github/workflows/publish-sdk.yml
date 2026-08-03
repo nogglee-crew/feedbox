@@ -1,12 +1,16 @@
 name: Publish SDK
 
+# package.json 버전이 올라간 채로 main에 머지되면 자동 배포한다.
+# 태그 푸시로 직접 배포하는 기존 방법도 그대로 쓸 수 있다.
 on:
   push:
+    branches:
+      - main
     tags:
       - "sdk-v*"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -15,6 +19,9 @@ jobs:
     environment: npm
     steps:
       - uses: actions/checkout@v6
+        with:
+          # 이미 배포된 버전인지 태그로 판단하므로 전체 이력이 필요하다
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 10.33.0
@@ -25,14 +32,63 @@ jobs:
           package-manager-cache: false
       - run: npm install --global npm@latest
       - run: pnpm install --frozen-lockfile
-      - name: Verify tag matches package version
+
+      - name: Decide whether to publish
+        id: release
         run: |
+          set -euo pipefail
           version=$(node -p "require('./packages/sdk/package.json').version")
-          if [ "$GITHUB_REF_NAME" != "sdk-v$version" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package version $version"
-            exit 1
+          tag="sdk-v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            if [ "$GITHUB_REF_NAME" != "$tag" ]; then
+              echo "태그 $GITHUB_REF_NAME 이 package.json 버전 $version 과 다릅니다"
+              exit 1
+            fi
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag_after_publish=false" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag 이 이미 있습니다. 버전이 오르지 않았으므로 배포를 건너뜁니다"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "새 버전 $version 을 배포합니다"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag_after_publish=true" >> "$GITHUB_OUTPUT"
           fi
-      - run: pnpm --filter @nogglee/feedbox typecheck
-      - run: pnpm --filter @nogglee/feedbox build
-      - run: npm publish
+
+      - if: steps.release.outputs.publish == 'true'
+        run: pnpm --filter @nogglee/feedbox typecheck
+      - if: steps.release.outputs.publish == 'true'
+        run: pnpm --filter @nogglee/feedbox build
+      - if: steps.release.outputs.publish == 'true'
+        run: npm publish
         working-directory: packages/sdk
+
+      # 배포가 끝난 뒤에 태그를 남긴다. 순서를 뒤집으면 배포 실패 시
+      # 태그만 남아 다음 실행이 배포를 건너뛴다.
+      - name: Tag and create release
+        if: steps.release.outputs.publish == 'true' && steps.release.outputs.tag_after_publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { flag = 1; next }
+            /^## \[/ { flag = 0 }
+            flag
+          ' packages/sdk/CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "변경 내역은 CHANGELOG.md를 참고하세요." > notes.md
+
+          gh release create "$TAG" \
+            --title "@nogglee/feedbox $VERSION" \
+            --notes-file notes.md \
+            --latest
