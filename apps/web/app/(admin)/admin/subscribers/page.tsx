@@ -1,5 +1,5 @@
 import { DataTable } from "@/features/analytics/components/data-table";
-import { formatDateTime } from "@/features/analytics/components/format";
+import { LocalTime } from "@/components/ui/local-time";
 import { listSubscribers } from "@/features/analytics/server/admin-queries";
 
 export default async function AdminSubscribersPage() {
@@ -34,7 +34,7 @@ export default async function AdminSubscribersPage() {
           {
             header: "신청일",
             cell: (subscriber) => (
-              <span className="text-muted">{formatDateTime(subscriber.createdAt)}</span>
+              <LocalTime value={subscriber.createdAt} style="shortDateTime" className="text-muted" />
             ),
           },
         ]}

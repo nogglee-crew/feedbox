@@ -5,8 +5,7 @@ import { cardClasses } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IssueCard } from "@/features/issues/components/issue-card";
 import { useInfiniteScroll } from "@/features/issues/components/use-infinite-scroll";
-import type { DashboardIssueItem } from "@/features/issues/server/issue-items";
-import type { OrgMember } from "@/lib/types";
+import type { Issue, OrgMember } from "@/lib/types";
 
 export function DashboardIssueList({
   orgSlug,
@@ -22,10 +21,10 @@ export function DashboardIssueList({
   status: string;
   q: string;
   members: OrgMember[];
-  initialItems: DashboardIssueItem[];
+  initialItems: Issue[];
   initialCursor: number | null;
 }) {
-  const { items, sentinelRef, loading, hasMore } = useInfiniteScroll<DashboardIssueItem>({
+  const { items, sentinelRef, loading, hasMore } = useInfiniteScroll<Issue>({
     initialItems,
     initialCursor,
     resetKey: `${status}|${q}`,
@@ -46,14 +45,8 @@ export function DashboardIssueList({
   return (
     <>
       <ul className="space-y-3">
-        {items.map(({ issue, createdAtLabel }) => (
-          <IssueCard
-            key={issue.id}
-            issue={issue}
-            members={members}
-            orgSlug={orgSlug}
-            createdAtLabel={createdAtLabel}
-          />
+        {items.map((issue) => (
+          <IssueCard key={issue.id} issue={issue} members={members} orgSlug={orgSlug} />
         ))}
       </ul>
       {hasMore && (

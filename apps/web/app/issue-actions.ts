@@ -1,25 +1,19 @@
 "use server";
 
 import {
-  toBoardItem,
-  toDashboardItem,
-  type BoardIssueItem,
-  type DashboardIssueItem,
-} from "@/features/issues/server/issue-items";
-import {
   getSessionByToken,
   listIssuesPage,
   releaseBelongsToOrg,
 } from "@/features/projects/server/queries";
 import { requireOrgBySlug } from "@/lib/orgs";
-import { ISSUE_STATUSES, type IssueStatus } from "@/lib/types";
+import { ISSUE_STATUSES, type Issue, type IssueStatus } from "@/lib/types";
 
 function parseStatus(value: unknown): IssueStatus | undefined {
   return ISSUE_STATUSES.includes(value as IssueStatus) ? (value as IssueStatus) : undefined;
 }
 
 export interface DashboardIssuePage {
-  items: DashboardIssueItem[];
+  items: Issue[];
   nextCursor: number | null;
 }
 
@@ -41,11 +35,11 @@ export async function loadMoreDashboardIssues(input: {
     { status: parseStatus(input.status), q: input.q || undefined },
     input.cursor,
   );
-  return { items: page.issues.map(toDashboardItem), nextCursor: page.nextCursor };
+  return { items: page.issues, nextCursor: page.nextCursor };
 }
 
 export interface BoardIssuePage {
-  items: BoardIssueItem[];
+  items: Issue[];
   nextCursor: number | null;
 }
 
@@ -63,5 +57,5 @@ export async function loadMoreBoardIssues(input: {
     { sessionId: session.id, status: parseStatus(input.status) },
     input.cursor,
   );
-  return { items: page.issues.map(toBoardItem), nextCursor: page.nextCursor };
+  return { items: page.issues, nextCursor: page.nextCursor };
 }
