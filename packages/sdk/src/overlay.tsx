@@ -1,7 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { createIssue } from "./api";
+import { baseUrl, createIssue } from "./api";
 import { getRecentDiagnostics } from "./diagnostics";
 import { captureScreenshot } from "./screenshot";
 import { buildSelector, elementText } from "./selector";
@@ -501,7 +501,7 @@ export function FeedboxOverlay({
         </span>
         <a
           data-feedbox="board-link"
-          href={`${(config.apiBaseUrl ?? "").replace(/\/$/, "")}/board/${session.token}`}
+          href={`${baseUrl(config)}/board/${session.token}`}
           target="_blank"
           rel="noreferrer"
           style={{ ...(styles.buttonGhost as React.CSSProperties), textDecoration: "none" }}
