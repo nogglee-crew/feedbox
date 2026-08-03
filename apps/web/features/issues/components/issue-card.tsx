@@ -59,7 +59,7 @@ export function IssueCard({
         >
           <div className="min-w-0 space-y-3">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="font-bold">#{issue.id}</span>
+              <span className="font-bold">#{issue.number}</span>
               <IssueStatusBadge status={status} label={ISSUE_STATUS_LABEL[status]} />
               {!hasSideColumn && <LocalTime value={issue.created_at} className="text-xs text-subtle" />}
             </div>
@@ -130,7 +130,7 @@ export function IssueCard({
       >
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold">#{issue.id}</span>
+            <span className="font-bold">#{issue.number}</span>
             {readOnly && <IssueStatusBadge status={status} label={ISSUE_STATUS_LABEL[status]} />}
             {!hasSideColumn && <LocalTime value={issue.created_at} className="truncate text-xs text-subtle" />}
           </div>

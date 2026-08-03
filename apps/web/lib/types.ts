@@ -58,6 +58,8 @@ export type IssueStatus = (typeof ISSUE_STATUSES)[number];
 
 export interface Issue {
   id: number;
+  /** 화면에 노출하는 프로젝트 단위 일련번호 */
+  number: number;
   project_id: string;
   release_id: string;
   session_id: string | null;

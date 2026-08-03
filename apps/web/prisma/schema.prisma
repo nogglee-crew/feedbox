@@ -88,6 +88,8 @@ model Project {
   projectKey String       @unique @map("project_key")
   apiKey     String       @map("api_key")
   baseUrl    String?      @map("base_url")
+  /// 프로젝트 단위 이슈 번호 채번기. 원자적 증가로 동시 등록 시 중복을 막는다
+  issueSeq   Int          @default(0) @map("issue_seq")
   createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
   org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
@@ -134,6 +136,9 @@ model QaSession {
 
 model Issue {
   id             Int         @id @default(autoincrement())
+  /// 화면에 노출하는 프로젝트 단위 일련번호.
+  /// id는 전역 증가라 그대로 보여주면 다른 고객사의 유입량까지 드러난다
+  number         Int
   projectId      String      @map("project_id") @db.Uuid
   releaseId      String      @map("release_id") @db.Uuid
   sessionId      String?     @map("session_id") @db.Uuid
@@ -160,6 +165,7 @@ model Issue {
   release        Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
   session        QaSession?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
+  @@unique([projectId, number])
   @@index([releaseId, status, createdAt])
   @@map("issues")
 }
