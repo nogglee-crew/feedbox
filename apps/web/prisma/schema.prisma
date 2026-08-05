@@ -164,10 +164,33 @@ model Issue {
   project        Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   release        Release     @relation(fields: [releaseId], references: [id], onDelete: Cascade)
   session        QaSession?  @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  comments       IssueComment[]
 
   @@unique([projectId, number])
   @@index([releaseId, status, createdAt])
   @@map("issues")
+}
+
+/// 이슈 코멘트. 플랫 구조(대댓글 없음).
+/// 멤버 코멘트는 작성 시점 프로필을 스냅샷하고, 익명 코멘트는 guestKey로만 식별한다.
+/// 화면의 "테스터 A/B" 라벨은 세션 안에서 guestKey의 첫 코멘트 순서로 읽기 시점에 파생한다.
+model IssueComment {
+  id              Int      @id @default(autoincrement())
+  issueId         Int      @map("issue_id")
+  /// 익명 테스터의 브라우저 식별 키(localStorage). 멤버 코멘트는 null.
+  /// 본인 수정/삭제 판정에 쓴다 — 키가 유실되면 권한도 사라지는 best-effort 권한
+  guestKey        String?  @map("guest_key")
+  /// 멤버 작성자의 auth user id. 본인 수정/삭제 판정용. 익명 코멘트는 null
+  authorUserId    String?  @map("author_user_id") @db.Uuid
+  /// 조직 멤버 작성자 프로필 스냅샷. 익명 코멘트는 null
+  authorName      String?  @map("author_name")
+  authorAvatarUrl String?  @map("author_avatar_url")
+  body            String
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  issue           Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId, createdAt])
+  @@map("issue_comments")
 }
 
 model SubscriptionInterest {

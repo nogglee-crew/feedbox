@@ -11,3 +11,4 @@ dist/
 .claude
 .qa-local/
 apps/web/lib/generated/
+planning/

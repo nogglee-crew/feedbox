@@ -1,12 +1,21 @@
 "use server";
 
 import {
+  getBoardCommentSummaries,
+  getOrgCommentSummaries,
+} from "@/features/issues/server/comments";
+import {
   getSessionByToken,
   listIssuesPage,
   releaseBelongsToOrg,
 } from "@/features/projects/server/queries";
 import { requireOrgBySlug } from "@/lib/orgs";
-import { ISSUE_STATUSES, type Issue, type IssueStatus } from "@/lib/types";
+import {
+  ISSUE_STATUSES,
+  type Issue,
+  type IssueCommentSummary,
+  type IssueStatus,
+} from "@/lib/types";
 
 function parseStatus(value: unknown): IssueStatus | undefined {
   return ISSUE_STATUSES.includes(value as IssueStatus) ? (value as IssueStatus) : undefined;
@@ -15,6 +24,7 @@ function parseStatus(value: unknown): IssueStatus | undefined {
 export interface DashboardIssuePage {
   items: Issue[];
   nextCursor: number | null;
+  comments: Record<number, IssueCommentSummary>;
 }
 
 /** 대시보드 이슈 더 불러오기 — 호출자가 해당 조직 소속인지 검증한다 */
@@ -27,7 +37,7 @@ export async function loadMoreDashboardIssues(input: {
 }): Promise<DashboardIssuePage> {
   const ctx = await requireOrgBySlug(input.orgSlug);
   if (!(await releaseBelongsToOrg(input.releaseId, ctx.org.id))) {
-    return { items: [], nextCursor: null };
+    return { items: [], nextCursor: null, comments: {} };
   }
 
   const page = await listIssuesPage(
@@ -35,12 +45,17 @@ export async function loadMoreDashboardIssues(input: {
     { status: parseStatus(input.status), q: input.q || undefined },
     input.cursor,
   );
-  return { items: page.issues, nextCursor: page.nextCursor };
+  const comments = await getOrgCommentSummaries(
+    ctx.org.id,
+    page.issues.map((issue) => issue.id),
+  );
+  return { items: page.issues, nextCursor: page.nextCursor, comments };
 }
 
 export interface BoardIssuePage {
   items: Issue[];
   nextCursor: number | null;
+  comments: Record<number, IssueCommentSummary>;
 }
 
 /** 공개 보드 이슈 더 불러오기 — 세션 토큰으로 인가하고 그 세션 범위로만 조회한다 */
@@ -50,12 +65,16 @@ export async function loadMoreBoardIssues(input: {
   status?: string;
 }): Promise<BoardIssuePage> {
   const session = await getSessionByToken(input.token);
-  if (!session) return { items: [], nextCursor: null };
+  if (!session) return { items: [], nextCursor: null, comments: {} };
 
   const page = await listIssuesPage(
     session.release_id,
     { sessionId: session.id, status: parseStatus(input.status) },
     input.cursor,
   );
-  return { items: page.issues, nextCursor: page.nextCursor };
+  const comments = await getBoardCommentSummaries(
+    input.token,
+    page.issues.map((issue) => issue.id),
+  );
+  return { items: page.issues, nextCursor: page.nextCursor, comments };
 }

@@ -7,23 +7,37 @@ import { cardClasses } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IssueCard } from "@/features/issues/components/issue-card";
+import { IssueComments } from "@/features/issues/components/issue-comments";
 import { ISSUE_STATUS_LABEL, ISSUE_STATUS_TONE } from "@/features/issues/components/issue-status";
-import { ISSUE_STATUSES, type Issue, type IssueStatus } from "@/lib/types";
+import {
+  ISSUE_STATUSES,
+  type Issue,
+  type IssueCommentSummary,
+  type IssueCommentViewer,
+  type IssueStatus,
+} from "@/lib/types";
+
+const EMPTY_SUMMARY: IssueCommentSummary = { count: 0, latest: null };
 
 export function IssueBoard({
   token,
   counts,
   initialItems,
   initialCursor,
+  initialComments,
+  viewer,
 }: {
   token: string;
   counts: Record<IssueStatus, number>;
   initialItems: Issue[];
   initialCursor: number | null;
+  initialComments: Record<number, IssueCommentSummary>;
+  viewer: IssueCommentViewer | null;
 }) {
   const [status, setStatus] = useState<IssueStatus | null>(null);
   const [items, setItems] = useState(initialItems);
   const [cursor, setCursor] = useState(initialCursor);
+  const [comments, setComments] = useState(initialComments);
   const [loading, setLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -38,6 +52,7 @@ export function IssueBoard({
         const page = await loadMoreBoardIssues({ token, cursor: null, status: next ?? undefined });
         setItems(page.items);
         setCursor(page.nextCursor);
+        setComments(page.comments);
       } finally {
         setLoading(false);
       }
@@ -52,6 +67,7 @@ export function IssueBoard({
       const page = await loadMoreBoardIssues({ token, cursor, status: status ?? undefined });
       setItems((prev) => [...prev, ...page.items]);
       setCursor(page.nextCursor);
+      setComments((prev) => ({ ...prev, ...page.comments }));
     } finally {
       setLoading(false);
     }
@@ -112,6 +128,14 @@ export function IssueBoard({
             screenshotMaxHeight="sm"
             customerConfirmToken={token}
             showMeta={false}
+            footer={
+              <IssueComments
+                scope={{ kind: "board", token }}
+                issueId={issue.id}
+                initialSummary={comments[issue.id] ?? EMPTY_SUMMARY}
+                viewer={viewer}
+              />
+            }
           />
         ))}
         {items.length === 0 && !loading && (
