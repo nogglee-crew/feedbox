@@ -29,6 +29,18 @@ export function FeedboxProvider({
 }: FeedboxConfig & { children?: ReactNode }) {
   const [session, setSession] = useState<ActiveSession | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const [hashTick, setHashTick] = useState(0);
+
+  // SPA에서 새 세션 링크로 이동하면 해시만 바뀌어 리로드가 없다.
+  // hashchange를 듣지 않으면 기존 세션이 유지된 채 이슈가 옛 세션으로 등록된다.
+  useEffect(() => {
+    const onHashChange = () => {
+      const fragment = window.location.hash.slice(1);
+      if (new URLSearchParams(fragment).get(HASH_PARAM)) setHashTick((tick) => tick + 1);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     const config: FeedboxConfig = { projectKey, apiKey, apiBaseUrl };
@@ -66,7 +78,7 @@ export function FeedboxProvider({
       cancelled = true;
       stopDiagnosticCapture();
     };
-  }, [projectKey, apiKey, apiBaseUrl]);
+  }, [projectKey, apiKey, apiBaseUrl, hashTick]);
 
   return (
     <>
