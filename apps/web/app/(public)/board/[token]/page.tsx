@@ -7,6 +7,7 @@ import { BoardViewTracker } from "@/features/analytics/components/board-view-tra
 import { Tag } from "@/components/ui/badge";
 import { AnchorButton } from "@/components/ui/button";
 import { IssueBoard } from "@/features/issues/components/issue-board";
+import { getBoardCommentSummaries, getBoardViewer } from "@/features/issues/server/comments";
 import {
   countIssuesByStatus,
   getProject,
@@ -69,6 +70,13 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
     countIssuesByStatus(session.release_id, { sessionId: session.id }),
   ]);
   if (!project || !release) notFound();
+  const [commentSummaries, viewer] = await Promise.all([
+    getBoardCommentSummaries(
+      session.token,
+      issuePage.issues.map((issue) => issue.id),
+    ),
+    getBoardViewer(session.token),
+  ]);
 
   const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + counts[s], 0);
   const resolved = counts.DONE + counts.CLOSED;
@@ -110,6 +118,8 @@ export default async function BoardPage({ params }: { params: Promise<{ token: s
         counts={counts}
         initialItems={issuePage.issues}
         initialCursor={issuePage.nextCursor}
+        initialComments={commentSummaries}
+        viewer={viewer}
       />
 
       <MadeByBadge />

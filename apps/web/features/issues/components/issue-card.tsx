@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cardClasses } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
@@ -26,6 +26,7 @@ export function IssueCard({
   screenshotMaxHeight = "md",
   customerConfirmToken,
   showMeta = true,
+  footer,
 }: {
   issue: Issue;
   orgSlug?: string;
@@ -34,6 +35,8 @@ export function IssueCard({
   screenshotMaxHeight?: "sm" | "md";
   customerConfirmToken?: string;
   showMeta?: boolean;
+  /** 카드 하단 전체 폭 영역 (보드의 코멘트 등) */
+  footer?: ReactNode;
 }) {
   const [status, setStatus] = useState(issue.status);
   const [assignee, setAssignee] = useState(issue.assignee);
@@ -116,6 +119,7 @@ export function IssueCard({
             </div>
           )}
         </div>
+        {footer && <div className="mt-4">{footer}</div>}
       </li>
     );
   }
@@ -175,6 +179,7 @@ export function IssueCard({
           </div>
         )}
       </div>
+      {footer && <div className="mt-4">{footer}</div>}
     </li>
   );
 }

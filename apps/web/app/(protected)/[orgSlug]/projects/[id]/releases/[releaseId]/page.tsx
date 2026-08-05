@@ -6,6 +6,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { LocalTime } from "@/components/ui/local-time";
 import { DashboardIssueList } from "@/features/issues/components/dashboard-issue-list";
 import { IssueFilters } from "@/features/issues/components/issue-filters";
+import { getOrgCommentSummaries, getOrgViewer } from "@/features/issues/server/comments";
 import { CreateQaSessionButton } from "@/features/projects/components/create-qa-session-button";
 import { QaSessionAccessToggle } from "@/features/projects/components/qa-session-access-toggle";
 import { StatusBadge } from "@/components/ui/badge";
@@ -66,12 +67,17 @@ export default async function ReleasePage({
   const activeStatus = ISSUE_STATUSES.includes(statusFilter as IssueStatus)
     ? (statusFilter as IssueStatus)
     : undefined;
-  const [members, issuePage, issueCount, sessions] = await Promise.all([
+  const [members, issuePage, issueCount, sessions, viewer] = await Promise.all([
     listOrgMembers(ctx.org.id),
     listIssuesPage(releaseId, { status: activeStatus, q: q || undefined }),
     countIssuesByStatus(releaseId, { q: q || undefined }),
     listSessions(releaseId),
+    getOrgViewer(ctx.org.id),
   ]);
+  const commentSummaries = await getOrgCommentSummaries(
+    ctx.org.id,
+    issuePage.issues.map((issue) => issue.id),
+  );
   const totalIssues = ISSUE_STATUSES.reduce((sum, s) => sum + issueCount[s], 0);
 
   const now = Date.now();
@@ -167,6 +173,8 @@ export default async function ReleasePage({
           members={members}
           initialItems={issuePage.issues}
           initialCursor={issuePage.nextCursor}
+          initialComments={commentSummaries}
+          viewer={viewer}
         />
       </section>
     </div>

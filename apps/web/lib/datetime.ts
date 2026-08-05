@@ -44,6 +44,29 @@ export function formatDateTime(
 }
 
 /**
+ * 코멘트 등 대화형 타임스탬프의 상대 표기.
+ * 방금 → N분 전 → N시간 전 → 어제 → N일 전, 한 달이 넘으면 날짜로 바꾼다.
+ * 날짜 표기만 시간대의 영향을 받는다.
+ */
+export function formatRelativeTime(
+  value: string | Date | null | undefined,
+  timeZone: string = FALLBACK_TIME_ZONE,
+): string {
+  const date = toDate(value);
+  if (!date) return "-";
+  const seconds = (Date.now() - date.getTime()) / 1000;
+  if (seconds < 60) return "방금";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  const days = Math.floor(hours / 24);
+  if (days < 2) return "어제";
+  if (days < 30) return `${days}일 전`;
+  return formatDateTime(date, "shortDate", timeZone);
+}
+
+/**
  * 마지막 활동이 얼마나 지났는지 훑기 위한 상대 표기.
  * 경과 시간만 쓰므로 시간대와 무관하다.
  */
