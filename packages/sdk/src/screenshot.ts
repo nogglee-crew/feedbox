@@ -52,8 +52,12 @@ export async function captureScreenshot(highlightRect?: ScreenshotHighlightRect)
     if (highlightRect) drawHighlight(canvas, highlightRect);
     const scale = Math.min(1, MAX_DIMENSION / Math.max(canvas.width, canvas.height));
     const target = scale < 1 ? downscale(canvas, scale) : canvas;
-    return target.toDataURL("image/jpeg", JPEG_QUALITY);
-  } catch {
+    const dataUrl = target.toDataURL("image/jpeg", JPEG_QUALITY);
+    // 캔버스 크기 한계를 넘으면 예외 없이 "data:,"가 나온다. 서버가 조용히 버리므로 여기서 실패로 처리한다.
+    if (!dataUrl.startsWith("data:image/jpeg")) throw new Error("캔버스가 빈 결과를 반환했습니다");
+    return dataUrl;
+  } catch (error) {
+    console.warn("[feedbox] 스크린샷 캡처 실패:", error);
     return null;
   }
 }

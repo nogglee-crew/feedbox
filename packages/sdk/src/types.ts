@@ -55,4 +55,6 @@ export interface IssuePayload {
 
 export interface CreatedIssue {
   id: number;
+  /** 프로젝트 단위 이슈 번호. 화면 표기는 이 값을 쓴다. */
+  number: number;
 }

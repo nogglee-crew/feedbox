@@ -359,6 +359,7 @@ export function FeedboxOverlay({
     setError(null);
     try {
       const screenshot = withScreenshot ? await captureScreenshot(target.rect) : null;
+      const captureFailed = withScreenshot && !screenshot;
       const issue = await createIssue(config, session.token, {
         pageUrl: window.location.href,
         selector: target.selector,
@@ -371,7 +372,11 @@ export function FeedboxOverlay({
         diagnostics: target.diagnostics,
       });
       reset();
-      showToast(`이슈 #${issue.id} 등록 완료`);
+      showToast(
+        captureFailed
+          ? `이슈 #${issue.number} 등록 완료 (스크린샷 캡처 실패)`
+          : `이슈 #${issue.number} 등록 완료`,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "이슈 등록에 실패했습니다");
     } finally {

@@ -103,7 +103,7 @@ export async function POST(request: Request) {
   const diagnostics = parseDiagnostics(body.diagnostics);
 
   try {
-    const { id } = await createSdkIssue({
+    const { id, number } = await createSdkIssue({
       project_id: project.id,
       release_id: release.id,
       session_id: session.id,
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
       memo: memo.trim().slice(0, 5000),
       screenshot_url: screenshotUrl,
     });
-    return corsJson({ id }, 201);
+    return corsJson({ id, number }, 201);
   } catch {
     return corsJson({ error: "이슈 저장에 실패했습니다" }, 500);
   }
