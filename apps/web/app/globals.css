@@ -352,13 +352,19 @@
 }
 
 /* 미확인 업데이트가 있을 때 프로필 트리거를 눌러보고 싶게 만드는 빛줄기 스윕 */
+/* 스르륵 들어오다가(0→40%) 슉 빠져나가고(40→58%) 잠시 쉰다(58→100%) */
 @keyframes glint-sweep {
   0% {
-    transform: translateX(-160%) skewX(-20deg);
+    transform: translateX(-120%) skewX(-14deg);
+    animation-timing-function: ease-out;
   }
-  45%,
+  40% {
+    transform: translateX(-35%) skewX(-14deg);
+    animation-timing-function: ease-in;
+  }
+  58%,
   100% {
-    transform: translateX(320%) skewX(-20deg);
+    transform: translateX(320%) skewX(-14deg);
   }
 }
 
@@ -382,12 +388,65 @@
     color-mix(in oklab, var(--color-neutral-400) 30%, transparent) 60%,
     transparent 85%
   );
-  animation: glint-sweep 2.8s ease-in-out infinite;
+  animation: glint-sweep 2.8s linear infinite;
+}
+
+/* 두근-두근(2초) 쉬고(1초) — 미확인 업데이트가 있을 때 프로필을 살아 있게 만든다 */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  17% {
+    transform: scale(1.04);
+  }
+  33% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+  66%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heartbeat {
+  animation: heartbeat 3s ease-in-out infinite;
+}
+
+/* 두근-두근(2초) 길게 쉬고(5초) — 주기적으로 상기시키되 소음이 되지 않게 */
+@keyframes heartbeat-calm {
+  0% {
+    transform: scale(1);
+  }
+  7% {
+    transform: scale(1.04);
+  }
+  14% {
+    transform: scale(1);
+  }
+  21% {
+    transform: scale(1.04);
+  }
+  28.5%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+.heartbeat-calm {
+  animation: heartbeat-calm 7s ease-in-out 0.8s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .glint-surface::after {
     animation: none;
     content: none;
+  }
+
+  .heartbeat,
+  .heartbeat-calm {
+    animation: none;
   }
 }

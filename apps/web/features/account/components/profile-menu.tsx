@@ -43,8 +43,8 @@ export function ProfileMenu({
       align="right"
       triggerClassName={cn(
         "flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 hover:bg-surface-hover",
-        // 미확인 업데이트가 있으면 빛줄기로 메뉴를 열고 싶게 만든다
-        changelogUnread && "glint-surface",
+        // 미확인 업데이트가 있으면 두근거림으로 메뉴를 열고 싶게 만든다
+        changelogUnread && "heartbeat",
       )}
       trigger={
         <>
