@@ -15,6 +15,8 @@ export interface OrgContext {
   orgs: Organization[];
   memberships: OrgMembershipSummary[];
   email: string;
+  /** 화면에 표시하는 이름. 계정 설정에서 바꾼 값이 있으면 그것, 없으면 구글 이름 */
+  displayName: string;
 }
 
 function mapOrganization(row: {
@@ -64,14 +66,21 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
   });
   if (rows.length === 0) return "no-org";
 
-  // Bind invited memberships and refresh mutable Google profile fields.
+  // Bind invited memberships and refresh the mutable Google avatar.
+  // 이름은 계정 설정에서 바꿀 수 있으므로 비어 있을 때만 구글 이름으로 채운다.
   const needsSync = rows.some(
-    (row) => row.authUserId === null || row.name !== user.name || row.avatarUrl !== user.avatarUrl,
+    (row) => row.authUserId === null || row.avatarUrl !== user.avatarUrl,
   );
   if (needsSync) {
     await prisma.organizationMember.updateMany({
       where: { OR: [{ authUserId: user.id }, { email }] },
-      data: { authUserId: user.id, name: user.name, avatarUrl: user.avatarUrl },
+      data: { authUserId: user.id, avatarUrl: user.avatarUrl },
+    });
+  }
+  if (user.name && rows.some((row) => row.name === null)) {
+    await prisma.organizationMember.updateMany({
+      where: { OR: [{ authUserId: user.id }, { email }], name: null },
+      data: { name: user.name },
     });
   }
 
@@ -85,6 +94,7 @@ export const loadOrgContext = cache(async function loadOrgContext(): Promise<Org
       role: row.role === "OWNER" ? ("owner" as const) : ("member" as const),
     })),
     email,
+    displayName: active.name ?? user.name ?? email,
   };
 });
 
@@ -116,12 +126,18 @@ export const loadOrgContextBySlug = cache(async function loadOrgContextBySlug(
   if (rows.length === 0) return "no-org";
 
   const needsSync = rows.some(
-    (row) => row.authUserId === null || row.name !== user.name || row.avatarUrl !== user.avatarUrl,
+    (row) => row.authUserId === null || row.avatarUrl !== user.avatarUrl,
   );
   if (needsSync) {
     await prisma.organizationMember.updateMany({
       where: { OR: [{ authUserId: user.id }, { email }] },
-      data: { authUserId: user.id, name: user.name, avatarUrl: user.avatarUrl },
+      data: { authUserId: user.id, avatarUrl: user.avatarUrl },
+    });
+  }
+  if (user.name && rows.some((row) => row.name === null)) {
+    await prisma.organizationMember.updateMany({
+      where: { OR: [{ authUserId: user.id }, { email }], name: null },
+      data: { name: user.name },
     });
   }
 
@@ -137,6 +153,7 @@ export const loadOrgContextBySlug = cache(async function loadOrgContextBySlug(
       role: row.role === "OWNER" ? ("owner" as const) : ("member" as const),
     })),
     email,
+    displayName: active.name ?? user.name ?? email,
   };
 });
 

@@ -1,11 +1,14 @@
 import Link from "next/link";
 
+/** 카카오톡 채널 문의 링크. 푸터·프로필 메뉴·랜딩 플로팅 버튼이 함께 쓴다 */
+export const OPEN_CHAT_URL = "http://pf.kakao.com/_xkNbxnX/chat";
+
 // TODO: youtube는 실제 채널 주소로 교체 필요
 const LINKS = {
   github: "https://github.com/nogglee-crew/feedbox",
   youtube: "https://www.youtube.com/@nogglee",
   email: "crew.nogglee@gmail.com",
-  openChat: "http://pf.kakao.com/_xkNbxnX/chat",
+  openChat: OPEN_CHAT_URL,
   demo: "/demo#session=Z72AGKeihOspaMRN3NoNqi8iaVfhtajh",
 };
 

@@ -350,3 +350,44 @@
     animation: none;
   }
 }
+
+/* 미확인 업데이트가 있을 때 프로필 트리거를 눌러보고 싶게 만드는 빛줄기 스윕 */
+@keyframes glint-sweep {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  45%,
+  100% {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+.glint-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.glint-surface::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 60%;
+  pointer-events: none;
+  /* 유리 광택: 흰색 저투명 코어 + 청회색(neutral) 가장자리의 부드러운 빛줄기 */
+  background: linear-gradient(
+    100deg,
+    transparent 15%,
+    color-mix(in oklab, var(--color-white) 55%, transparent) 45%,
+    color-mix(in oklab, var(--color-neutral-400) 30%, transparent) 60%,
+    transparent 85%
+  );
+  animation: glint-sweep 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glint-surface::after {
+    animation: none;
+    content: none;
+  }
+}
