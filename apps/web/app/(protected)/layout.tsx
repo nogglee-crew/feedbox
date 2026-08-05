@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ToastProvider } from "@/components/ui/toast";
 import { DashboardHomeLink, ProfileMenu } from "@/features/account/components/profile-menu";
+import { getChangelogUnread } from "@/features/changelog/server/changelog";
 import { hasPaidAccess } from "@/features/billing/domain/entitlements";
 import { getUser } from "@/lib/auth";
 import { getFlashToast } from "@/lib/flash-toast";
@@ -36,6 +37,7 @@ export default async function ProtectedLayout({
         }))
       : [];
   const flashToast = await getFlashToast();
+  const changelogUnread = await getChangelogUnread();
 
   return (
     <ToastProvider initialToast={flashToast}>
@@ -43,7 +45,7 @@ export default async function ProtectedLayout({
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <DashboardHomeLink teams={teams} />
           <ProfileMenu
-            name={user.name}
+            name={orgCtx && orgCtx !== "not-member" ? orgCtx.displayName : user.name}
             email={user.email}
             avatarUrl={user.avatarUrl}
             team={
@@ -56,6 +58,7 @@ export default async function ProtectedLayout({
                 : null
             }
             teams={teams}
+            changelogUnread={Boolean(changelogUnread)}
           />
         </div>
       </header>

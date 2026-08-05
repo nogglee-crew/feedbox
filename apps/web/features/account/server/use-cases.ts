@@ -47,3 +47,19 @@ export async function deleteCurrentAccount(): Promise<void> {
     throw new Error(`계정 삭제에 실패했습니다: ${error.message}`);
   }
 }
+
+const MAX_USERNAME_LENGTH = 50;
+
+/** 표시 이름 변경 — 이 계정의 모든 팀 멤버십에 반영된다 */
+export async function updateUsernameForCurrentUser(name: string): Promise<void> {
+  const user = await getUser();
+  if (!user?.email) redirect("/auth/sign-in");
+
+  const trimmed = name.trim().slice(0, MAX_USERNAME_LENGTH);
+  if (!trimmed) throw new Error("이름을 입력해 주세요");
+
+  await prisma.organizationMember.updateMany({
+    where: { OR: [{ authUserId: user.id }, { email: user.email.toLowerCase() }] },
+    data: { name: trimmed },
+  });
+}

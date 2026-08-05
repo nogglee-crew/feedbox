@@ -70,6 +70,8 @@ model OrganizationMember {
   // Null until an invited member signs in with Google.
   name       String?
   avatarUrl  String?          @map("avatar_url")
+  /// 체인지로그 마지막 확인 시각. 최신 항목 날짜와 비교해 미확인 뱃지를 만든다
+  changelogSeenAt DateTime?   @map("changelog_seen_at") @db.Timestamptz(6)
   role       OrganizationRole @default(MEMBER)
   createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)

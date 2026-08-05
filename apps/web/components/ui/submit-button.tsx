@@ -11,6 +11,8 @@ interface SubmitButtonProps {
   pendingText?: ReactNode;
   /** 제출 조건 미충족 등 폼 외적인 비활성화 사유 */
   disabled?: boolean;
+  /** 제출 중 스피너 아이콘 표시 여부 */
+  spinner?: boolean;
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
@@ -24,6 +26,7 @@ export function SubmitButton({
   children,
   pendingText,
   disabled,
+  spinner = true,
   variant = "primary",
   size,
   className,
@@ -38,7 +41,7 @@ export function SubmitButton({
       disabled={pending || disabled}
       aria-busy={pending}
     >
-      {pending && <HiOutlineArrowPath aria-hidden className="size-4 animate-spin" />}
+      {pending && spinner && <HiOutlineArrowPath aria-hidden className="size-4 animate-spin" />}
       {pending ? (pendingText ?? children) : children}
     </Button>
   );

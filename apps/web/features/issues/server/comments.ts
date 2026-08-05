@@ -184,7 +184,8 @@ async function getOrgMemberProfile(
   if (!membership) return null;
   return {
     userId: user.id,
-    name: user.name ?? membership.name ?? membership.email,
+    // 계정 설정에서 바꾼 이름이 우선, 없으면 구글 이름
+    name: membership.name ?? user.name ?? membership.email,
     avatarUrl: user.avatarUrl ?? membership.avatarUrl,
   };
 }

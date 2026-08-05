@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { buildInstallPrompt } from "@/lib/install-prompt";
 import { StatusBadge, Tag } from "@/components/ui/badge";
@@ -7,7 +8,9 @@ import { Card, cardClasses } from "@/components/ui/card";
 import { Code } from "@/components/ui/code";
 import { CopyButton } from "@/components/ui/copy-button";
 import { SiteFooter } from "@/components/site-footer";
+import { UpdateLink } from "@/features/changelog/components/update-link";
 import { FeatureCard } from "@/features/landing/components/feature-card";
+import { KakaoInquiryButton } from "@/features/landing/components/kakao-inquiry-button";
 import { HeroDemo } from "@/features/landing/components/hero-demo";
 import { Reveal } from "@/features/landing/components/reveal";
 import { TrackedLink } from "@/features/landing/components/tracked-link";
@@ -129,7 +132,15 @@ const JSON_LD = {
   ],
 };
 
-export function LandingPage() {
+export function LandingPage({
+  authenticated = false,
+  latestChangelogDate = null,
+  changelogUnread = null,
+}: {
+  authenticated?: boolean;
+  latestChangelogDate?: string | null;
+  changelogUnread?: boolean | null;
+}) {
   return (
     <div className="flex min-h-dvh flex-col">
       <script
@@ -138,22 +149,37 @@ export function LandingPage() {
       />
       <header className="sticky top-0 z-40 border-b border-border/60 bg-surface/60 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3">
-          <Image
-            src="/feedbox-logo.png"
-            alt="FEEDBOX"
-            width={1468}
-            height={284}
-            priority
-            className="h-6 w-auto"
-          />
-          <TrackedLink
-            href="/auth/sign-in"
-            event="cta_signin_click"
-            eventParams={{ location: "header" }}
-            className={buttonClasses("secondary", "sm")}
-          >
-            로그인
-          </TrackedLink>
+          <Link href="/" aria-label="FEEDBOX 홈">
+            <Image
+              src="/feedbox-logo.png"
+              alt="FEEDBOX"
+              width={1468}
+              height={284}
+              priority
+              className="h-6 w-auto"
+            />
+          </Link>
+          <div className="flex items-center gap-2">
+            <UpdateLink
+              latestDate={latestChangelogDate}
+              serverUnread={changelogUnread}
+              className={buttonClasses("ghost", "sm")}
+            />
+            {authenticated ? (
+              <Link href="/projects" className={buttonClasses("secondary", "sm")}>
+                대시보드로 이동
+              </Link>
+            ) : (
+              <TrackedLink
+                href="/auth/sign-in"
+                event="cta_signin_click"
+                eventParams={{ location: "header" }}
+                className={buttonClasses("secondary", "sm")}
+              >
+                로그인
+              </TrackedLink>
+            )}
+          </div>
         </div>
       </header>
 
@@ -177,14 +203,20 @@ export function LandingPage() {
               피드박스가 자동으로 수집해드릴게요.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <TrackedLink
-                href="/auth/sign-in"
-                event="cta_signin_click"
-                eventParams={{ location: "hero" }}
-                className={buttonClasses("primary")}
-              >
-                구글 계정으로 시작하기
-              </TrackedLink>
+              {authenticated ? (
+                <Link href="/projects" className={buttonClasses("primary")}>
+                  대시보드로 이동
+                </Link>
+              ) : (
+                <TrackedLink
+                  href="/auth/sign-in"
+                  event="cta_signin_click"
+                  eventParams={{ location: "hero" }}
+                  className={buttonClasses("primary")}
+                >
+                  구글 계정으로 시작하기
+                </TrackedLink>
+              )}
               <TrackedLink
                 href={DEMO_URL}
                 event="demo_click"
@@ -410,14 +442,23 @@ export function LandingPage() {
                 프롬프트 한 장 붙여넣으면 설치는 끝
               </p>
               <div className="relative mt-6 flex justify-center">
-                <TrackedLink
-                  href="/auth/sign-in"
-                  event="cta_signin_click"
-                  eventParams={{ location: "footer" }}
-                  className="inline-flex items-center justify-center rounded-md bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
-                >
-                  구글 계정으로 시작하기
-                </TrackedLink>
+                {authenticated ? (
+                  <Link
+                    href="/projects"
+                    className="inline-flex items-center justify-center rounded-md bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                  >
+                    대시보드로 이동
+                  </Link>
+                ) : (
+                  <TrackedLink
+                    href="/auth/sign-in"
+                    event="cta_signin_click"
+                    eventParams={{ location: "footer" }}
+                    className="inline-flex items-center justify-center rounded-md bg-surface px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                  >
+                    구글 계정으로 시작하기
+                  </TrackedLink>
+                )}
               </div>
             </div>
           </Reveal>
@@ -425,6 +466,7 @@ export function LandingPage() {
       </main>
 
       <SiteFooter />
+      <KakaoInquiryButton />
     </div>
   );
 }
