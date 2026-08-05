@@ -14,6 +14,8 @@ const PUBLIC_PATHS = [
   /^\/board\//,
   /^\/terms/,
   /^\/privacy/,
+  // 업데이트 소식 — 비로그인 방문자도 랜딩에서 들어온다
+  /^\/changelog$/,
 ];
 
 export async function middleware(request: NextRequest) {
