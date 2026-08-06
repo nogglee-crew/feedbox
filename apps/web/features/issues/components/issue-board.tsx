@@ -128,6 +128,7 @@ export function IssueBoard({
             screenshotMaxHeight="sm"
             customerConfirmToken={token}
             showMeta={false}
+            commentSummary={comments[issue.id] ?? EMPTY_SUMMARY}
             footer={
               <IssueComments
                 scope={{ kind: "board", token }}

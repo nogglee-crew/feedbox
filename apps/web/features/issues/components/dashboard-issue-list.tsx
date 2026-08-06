@@ -81,6 +81,7 @@ export function DashboardIssueList({
             issue={issue}
             members={members}
             orgSlug={orgSlug}
+            commentSummary={comments[issue.id] ?? EMPTY_SUMMARY}
             footer={
               <IssueComments
                 scope={{ kind: "dashboard", orgSlug }}
