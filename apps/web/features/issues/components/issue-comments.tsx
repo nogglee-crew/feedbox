@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { HiArrowUp, HiEllipsisHorizontal, HiOutlineChatBubbleOvalLeft } from "react-icons/hi2";
+import {
+  HiArrowUp,
+  HiChevronUp,
+  HiEllipsisHorizontal,
+  HiOutlineChatBubbleOvalLeft,
+} from "react-icons/hi2";
 import {
   editDashboardIssueComment,
   editIssueComment,
@@ -201,30 +206,35 @@ export function IssueComments({
 
   if (!expanded) {
     return (
-      <button
-        type="button"
-        onClick={() => void expand()}
-        className={cn(
-          "flex w-full min-w-0 items-center gap-2 border-t border-border pt-3 text-left text-sm",
-          "text-muted transition-colors hover:text-foreground",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-        )}
-      >
-        <HiOutlineChatBubbleOvalLeft aria-hidden className="size-4 shrink-0" />
-        {latest ? (
-          <>
-            <span className="shrink-0 font-semibold">{count}</span>
-            <CommentAvatar author={latest.author} size="sm" />
-            <span className="min-w-0 truncate">{latest.body}</span>
-            <span aria-hidden className="shrink-0 text-subtle">
-              ·
-            </span>
-            <RelativeTime value={latest.created_at} className="shrink-0 text-xs text-subtle" />
-          </>
-        ) : (
-          <span>댓글 달기</span>
-        )}
-      </button>
+      <div className="border-t border-border pt-2">
+        <button
+          type="button"
+          onClick={() => void expand()}
+          className={cn(
+            "-mx-2 flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm",
+            "text-muted transition-colors hover:bg-surface-hover hover:text-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+          )}
+        >
+          <HiOutlineChatBubbleOvalLeft aria-hidden className="size-4 shrink-0" />
+          {latest ? (
+            <>
+              <span className="shrink-0 font-semibold tabular-nums">{count}</span>
+              <CommentAvatar author={latest.author} size="sm" />
+              <span className="shrink-0 font-medium text-foreground">
+                {authorName(latest.author)}
+              </span>
+              <span className="min-w-0 truncate">{latest.body}</span>
+              <RelativeTime
+                value={latest.created_at}
+                className="ml-auto shrink-0 pl-2 text-xs text-subtle"
+              />
+            </>
+          ) : (
+            <span>댓글 달기</span>
+          )}
+        </button>
+      </div>
     );
   }
 
@@ -233,23 +243,36 @@ export function IssueComments({
       <button
         type="button"
         onClick={() => setExpanded(false)}
-        className="flex items-center gap-2 text-sm font-semibold text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        className={cn(
+          "flex items-center gap-1.5 text-sm font-semibold text-muted transition-colors hover:text-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+        )}
       >
         <HiOutlineChatBubbleOvalLeft aria-hidden className="size-4" />
-        댓글{count > 0 ? ` ${count}` : ""} 접기
+        댓글
+        {count > 0 && <span className="font-normal text-subtle tabular-nums">{count}</span>}
+        <HiChevronUp aria-hidden className="size-3.5 text-subtle" />
       </button>
 
       {olderCount > 0 && (
-        <Button variant="ghost" size="sm" disabled={loading} onClick={() => void loadOlder()}>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => void loadOlder()}
+          className={cn(
+            "text-xs font-medium text-muted transition-colors hover:text-foreground disabled:opacity-50",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+          )}
+        >
           이전 댓글 {olderCount}개 보기
-        </Button>
+        </button>
       )}
       {loading && comments.length === 0 && <p className="text-xs text-subtle">불러오는 중...</p>}
 
       {comments.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {comments.map((comment) => (
-            <li key={comment.id} className="flex items-start gap-2">
+            <li key={comment.id} className="group flex items-start gap-2.5">
               <CommentAvatar author={comment.author} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-x-2">
@@ -257,125 +280,143 @@ export function IssueComments({
                   <RelativeTime value={comment.created_at} className="text-xs text-subtle" />
                 </div>
                 {editingId === comment.id ? (
-                  <div className="mt-1 space-y-2">
-                    <textarea
-                      rows={2}
-                      value={editBody}
-                      onChange={(e) => setEditBody(e.target.value)}
-                      className="w-full resize-none rounded-md border border-border bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-focus/30"
-                    />
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="primary" onClick={() => void saveEdit(comment.id)}>
-                        저장
-                      </Button>
+                  <div className="mt-1.5 space-y-2">
+                    <div
+                      className={cn(
+                        "rounded-lg border border-border bg-surface px-3 py-2 transition-colors",
+                        "focus-within:border-focus",
+                      )}
+                    >
+                      <textarea
+                        rows={2}
+                        autoFocus
+                        value={editBody}
+                        onChange={(e) => setEditBody(e.target.value)}
+                        className="w-full resize-none bg-transparent text-sm leading-relaxed focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
                         취소
+                      </Button>
+                      <Button size="sm" variant="primary" onClick={() => void saveEdit(comment.id)}>
+                        저장
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="whitespace-pre-wrap text-sm">{comment.body}</p>
+                  <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed">
+                    {comment.body}
+                  </p>
                 )}
               </div>
               {(comment.mine || comment.deletable) && editingId !== comment.id && (
-                <Menu
-                  label="코멘트 관리"
-                  align="right"
-                  trigger={
-                    <span
-                      className={cn(
-                        "flex size-6 items-center justify-center rounded-md text-subtle",
-                        "transition-colors hover:bg-surface-hover hover:text-foreground",
-                      )}
-                    >
-                      <HiEllipsisHorizontal aria-hidden className="size-4" />
-                    </span>
-                  }
-                >
-                  {(close) => (
-                    <>
-                      {comment.mine && (
-                        <button
-                          type="button"
-                          className={menuItemClasses()}
-                          onClick={() => {
-                            setEditingId(comment.id);
-                            setEditBody(comment.body);
-                            close();
-                          }}
-                        >
-                          수정
-                        </button>
-                      )}
-                      {comment.deletable && (
-                        <button
-                          type="button"
-                          className={menuItemClasses("text-danger")}
-                          onClick={() => {
-                            void remove(comment.id);
-                            close();
-                          }}
-                        >
-                          삭제
-                        </button>
-                      )}
-                    </>
+                <div
+                  className={cn(
+                    "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
                   )}
-                </Menu>
+                >
+                  <Menu
+                    label="코멘트 관리"
+                    align="right"
+                    trigger={
+                      <span
+                        className={cn(
+                          "flex size-6 items-center justify-center rounded-md text-subtle",
+                          "transition-colors hover:bg-surface-hover hover:text-foreground",
+                        )}
+                      >
+                        <HiEllipsisHorizontal aria-hidden className="size-4" />
+                      </span>
+                    }
+                  >
+                    {(close) => (
+                      <>
+                        {comment.mine && (
+                          <button
+                            type="button"
+                            className={menuItemClasses()}
+                            onClick={() => {
+                              setEditingId(comment.id);
+                              setEditBody(comment.body);
+                              close();
+                            }}
+                          >
+                            수정
+                          </button>
+                        )}
+                        {comment.deletable && (
+                          <button
+                            type="button"
+                            className={menuItemClasses("text-danger")}
+                            onClick={() => {
+                              void remove(comment.id);
+                              close();
+                            }}
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </Menu>
+                </div>
               )}
             </li>
           ))}
         </ul>
       )}
 
-      <div>
-        <div
-          className={cn(
-            "-mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 transition-colors",
-            "focus-within:bg-surface-hover",
-          )}
-        >
-          {viewer ? (
-            <Avatar name={viewer.name} src={viewer.avatar_url} />
-          ) : (
-            <Avatar name="테스터" />
-          )}
-          <textarea
-            ref={inputRef}
-            rows={1}
-            placeholder="댓글 추가"
-            value={body}
-            disabled={submitting}
-            onChange={(e) => {
-              setBody(e.target.value);
-              autoGrow();
-            }}
-            onKeyDown={(e) => {
-              // Enter 전송, Shift+Enter 줄바꿈. 한글 조합 중 Enter는 무시한다
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                void submit();
-              }
-            }}
-            className="min-w-0 flex-1 resize-none self-center bg-transparent text-sm placeholder:text-subtle focus:outline-none"
-          />
-          <button
-            type="button"
-            aria-label="댓글 등록"
-            disabled={submitting || !body.trim()}
-            onClick={() => void submit()}
+      <div className="flex items-start gap-2.5">
+        {viewer ? (
+          <Avatar name={viewer.name} src={viewer.avatar_url} className="mt-1.5" />
+        ) : (
+          <Avatar name="테스터" className="mt-1.5" />
+        )}
+        <div className="min-w-0 flex-1">
+          <div
             className={cn(
-              "flex size-6 shrink-0 items-center justify-center rounded-full transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-              body.trim() && !submitting
-                ? "bg-primary text-on-primary hover:bg-primary-hover"
-                : "bg-surface-muted text-subtle",
+              "flex items-end gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 transition-colors",
+              "focus-within:border-focus",
             )}
           >
-            <HiArrowUp aria-hidden className="size-3.5" />
-          </button>
+            <textarea
+              ref={inputRef}
+              rows={1}
+              placeholder="댓글 추가"
+              value={body}
+              disabled={submitting}
+              onChange={(e) => {
+                setBody(e.target.value);
+                autoGrow();
+              }}
+              onKeyDown={(e) => {
+                // Enter 전송, Shift+Enter 줄바꿈. 한글 조합 중 Enter는 무시한다
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  void submit();
+                }
+              }}
+              className="min-w-0 flex-1 resize-none self-center bg-transparent py-1 text-sm leading-relaxed placeholder:text-subtle focus:outline-none"
+            />
+            <button
+              type="button"
+              aria-label="댓글 등록"
+              disabled={submitting || !body.trim()}
+              onClick={() => void submit()}
+              className={cn(
+                "mb-1 flex size-6 shrink-0 items-center justify-center rounded-full transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+                body.trim() && !submitting
+                  ? "bg-primary text-on-primary hover:bg-primary-hover"
+                  : "bg-surface-muted text-subtle",
+              )}
+            >
+              <HiArrowUp aria-hidden className="size-3.5" />
+            </button>
+          </div>
+          {error && <p className="mt-1 text-xs text-danger">{error}</p>}
         </div>
-        {error && <p className="mt-1 text-xs text-danger">{error}</p>}
       </div>
     </div>
   );
