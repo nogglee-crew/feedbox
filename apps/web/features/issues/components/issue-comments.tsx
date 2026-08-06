@@ -48,7 +48,7 @@ function authorName(author: IssueCommentAuthor): string {
   return author.kind === "member" ? author.name : author.label;
 }
 
-function CommentAvatar({ author, size = "md" }: { author: IssueCommentAuthor; size?: "sm" | "md" }) {
+export function CommentAvatar({ author, size = "md" }: { author: IssueCommentAuthor; size?: "sm" | "md" }) {
   if (author.kind === "member") {
     return <Avatar name={author.name} src={author.avatar_url} size={size} />;
   }
