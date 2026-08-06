@@ -18,7 +18,7 @@ import {
   submitIssueComment,
 } from "@/app/comment-actions";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
 import { Menu, menuItemClasses } from "@/components/ui/menu";
 import { RelativeTime } from "@/components/ui/relative-time";
@@ -255,17 +255,9 @@ export function IssueComments({
       </button>
 
       {olderCount > 0 && (
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => void loadOlder()}
-          className={cn(
-            "text-xs font-medium text-muted transition-colors hover:text-foreground disabled:opacity-50",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-          )}
-        >
+        <Button variant="ghost" size="sm" disabled={loading} onClick={() => void loadOlder()}>
           이전 댓글 {olderCount}개 보기
-        </button>
+        </Button>
       )}
       {loading && comments.length === 0 && <p className="text-xs text-subtle">불러오는 중...</p>}
 
@@ -399,21 +391,14 @@ export function IssueComments({
               }}
               className="min-w-0 flex-1 resize-none self-center bg-transparent py-1 text-sm leading-relaxed placeholder:text-subtle focus:outline-none"
             />
-            <button
-              type="button"
-              aria-label="댓글 등록"
+            <IconButton
+              size="sm"
+              label="댓글 등록"
+              icon={<HiArrowUp aria-hidden className="size-3.5" />}
               disabled={submitting || !body.trim()}
               onClick={() => void submit()}
-              className={cn(
-                "mb-1 flex size-6 shrink-0 items-center justify-center rounded-full transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-                body.trim() && !submitting
-                  ? "bg-primary text-on-primary hover:bg-primary-hover"
-                  : "bg-surface-muted text-subtle",
-              )}
-            >
-              <HiArrowUp aria-hidden className="size-3.5" />
-            </button>
+              className="mb-0.5 shrink-0"
+            />
           </div>
           {error && <p className="mt-1 text-xs text-danger">{error}</p>}
         </div>
